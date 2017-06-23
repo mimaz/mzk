@@ -108,6 +108,10 @@ namespace mzk
 		 inline other_object_type *pointer<object_type, strong>::as() const
 		 { return static_cast<other_object_type *>(raw()); }
 
+	template<typename object_type, bool strong>
+		inline bool pointer<object_type, strong>::is_null() const
+		{ return raw() == nullptr; }
+
 
 
 

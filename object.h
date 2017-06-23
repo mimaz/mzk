@@ -49,8 +49,11 @@ namespace mzk
 			 object_type *operator->() const;
 
 			 
+
 			 template<typename other_object_type>
 				 inline other_object_type *as() const;
+
+			 bool is_null() const;
 
 
 			 void on_mzk_object_delete() override;
