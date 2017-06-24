@@ -34,50 +34,50 @@ namespace mzk
 		class pointer : public base_pointer
 		{
 		 public:
-			 pointer();
-			 pointer(const pointer &other);
-			 pointer(pointer &&other);
+			pointer();
+			pointer(const pointer &other);
+			pointer(pointer &&other);
 
-			 pointer(object_type *obj);
+			pointer(object_type *obj);
 
-			 template<typename other_object_type, bool other_strong>
-				 pointer(const pointer<other_object_type, other_strong> &other);
+			template<typename other_object_type, bool other_strong>
+				pointer(const pointer<other_object_type, other_strong> &other);
 
-			 template<typename other_object_type>
-				 pointer(other_object_type *obj);
+			template<typename other_object_type>
+				pointer(other_object_type *obj);
 
-			 ~pointer();
-
-
-
-			 pointer &operator=(const pointer &other);
-			 pointer &operator=(pointer &&other);
-			 pointer &operator=(object_type *obj);
-
-			 template<typename other_object_type, bool other_strong>
-				 pointer &operator=(const pointer<other_object_type, other_strong> &other);
-
-			 template<typename other_object_type>
-				 pointer &operator=(other_object_type *obj);
+			~pointer();
 
 
-			 object_type *raw() const;
-			 operator object_type *() const;
-			 object_type *operator->() const;
+
+			pointer &operator=(const pointer &other);
+			pointer &operator=(pointer &&other);
+			pointer &operator=(object_type *obj);
+
+			template<typename other_object_type, bool other_strong>
+				pointer &operator=(const pointer<other_object_type, other_strong> &other);
+
+			template<typename other_object_type>
+				pointer &operator=(other_object_type *obj);
+
+
+			object_type *raw() const;
+			operator object_type *() const;
+			object_type *operator->() const;
 
 			 
 
-			 template<typename other_object_type>
-				 inline other_object_type *as() const;
+			template<typename other_object_type>
+				inline other_object_type *as() const;
 
-			 bool is_null() const;
+			bool is_null() const;
 
 
-			 void on_mzk_object_delete() override;
+			void on_mzk_object_delete() override;
 
 
 		 private:
-			 object_type *_pointer;
+			object_type *_pointer;
 		};
 
 
@@ -85,19 +85,19 @@ namespace mzk
 	class object
 	{
 	 public:
-		 object();
-		 object(const object &other) = delete;
-		 object(object &&other) = delete;
+		object();
+	 	object(const object &other) = delete;
+		object(object &&other) = delete;
 
-		 virtual ~object();
+		virtual ~object();
 
 
-		 void register_mzk_pointer(base_pointer *ptr, bool strong);
-		 void unregister_mzk_pointer(base_pointer *ptr, bool strong);
+		void register_mzk_pointer(base_pointer *ptr, bool strong);
+		void unregister_mzk_pointer(base_pointer *ptr, bool strong);
 
-		private:
-		 std::unordered_set<base_pointer *> _pointer_set;
-		 int _ref_count;
+	 private:
+		std::unordered_set<base_pointer *> _pointer_set;
+		int _ref_count;
 	};
 
 

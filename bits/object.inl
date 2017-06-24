@@ -122,8 +122,8 @@ namespace mzk
 
 	template<typename object_type, bool strong>
 		template<typename other_object_type>
-		 inline other_object_type *pointer<object_type, strong>::as() const
-		 { return static_cast<other_object_type *>(raw()); }
+			inline other_object_type *pointer<object_type, strong>::as() const
+			{ return static_cast<other_object_type *>(raw()); }
 
 	template<typename object_type, bool strong>
 		inline bool pointer<object_type, strong>::is_null() const
@@ -135,6 +135,12 @@ namespace mzk
 	inline object::object()
 		: _ref_count(0)
 	{}
+
+	inline object::~object()
+	{
+		for (base_pointer *ptr : _pointer_set)
+			ptr->on_mzk_object_delete();
+	}
 
 	inline void object::register_mzk_pointer(base_pointer *ptr, bool strong)
 	{

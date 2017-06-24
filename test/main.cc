@@ -17,9 +17,9 @@
 
 #include <iostream>
 
-#include "object.h"
-#include "signal.h"
-#include "property.h"
+#include <mzk/object.h>
+#include <mzk/signal.h>
+#include <mzk/property.h>
 
 class test : public mzk::object
 {
