@@ -143,13 +143,9 @@ namespace mzk
 namespace std
 {
 	  template<typename object_type, bool strong>
-	class hash<mzk::pointer<object_type, strong>>
-	{
-	  public:
-		inline size_t operator()(
-				const mzk::pointer<object_type, strong> &ptr) const
-		{ return hash(ptr.raw()); }
-	};
-};
+	inline size_t hash<mzk::pointer<object_type, strong>>::operator()(
+			const mzk::pointer<object_type, strong> &ptr) const
+	{ return hash<object_type *>()(ptr.raw()); }
+}
 
 #endif

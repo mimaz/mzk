@@ -19,44 +19,61 @@
 #define __MZK_SIGNAL_H
 
 #include <vector>
+#include <unordered_set>
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
-# include "signal-object.h"
 # include "shared-object.h"
 # undef __MZK_NO_IMPL
 #else
-# include "signal-object.h"
 # include "shared-object.h"
 #endif
 
 namespace mzk
 {
+	class slot_object;
+
 	class connection : public shared_object
 	{
 	  public:
 		virtual void disconnect() = 0;
 	};
 
+	class slot_object
+	{
+	  public:
+		slot_object();
+		slot_object(const slot_object &other) = delete;
+		slot_object(slot_object &&other) = delete;
+		virtual ~slot_object();
+
+		void register_mzk_connection(connection *conn);
+		void unregister_mzk_connection(connection *conn);
+	 
+	  private:
+		std::unordered_set<ptr<connection>> _connection_set;
+	};
+
 	  template<typename ...arg_types>
-	class signal
+	class specific_connection;
+
+	  template<typename ...arg_types>
+	class signal : public slot_object
 	{
 	  public:
 		signal();
-		signal(const signal &other) = delete;
-		signal(signal &&other) = delete;
-
 		~signal();
 
 		  template<typename ...bind_arg_types>
 		ptr<connection> connect(const bind_arg_types &...args);
 
-		void disconnect(connection *conn);
+		void operator()(const arg_types &...args);
 
-		signal &operator()(const arg_types &...args);
+		void register_mzk_connection(specific_connection<arg_types ...> *conn);
+		void unregister_mzk_connection(specific_connection<arg_types ...> *conn);
 
 	 private:
-		std::vector<ptr<connection>> _slot_set;
+		std::unordered_set<ptr<specific_connection<arg_types ...>>> _connection_set;
 	};
 }
 

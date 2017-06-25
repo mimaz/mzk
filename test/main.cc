@@ -56,11 +56,9 @@ int main()
 	mzk::signal<int> sig;
 
 
-	auto connection = sig.connect(&slot::foo, sl.raw(), std::placeholders::_1);
-	sl->register_mzk_connection(connection);
+	auto connection = sig.connect(&slot::foo, sl.raw(), 123);
 
 	sig(123);
-
 	sig(123);
 
 

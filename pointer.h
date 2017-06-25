@@ -81,6 +81,16 @@ namespace mzk
 	using weak_ptr = pointer<object_type, false>;
 }
 
+namespace std
+{
+	  template<typename object_type, bool strong>
+	class hash<mzk::pointer<object_type, strong>>
+	{
+	  public:
+		size_t operator()(const mzk::pointer<object_type, strong> &ptr) const;
+	};
+};
+
 #ifndef __MZK_NO_IMPL
 # include "bits/pointer.inl"
 #endif

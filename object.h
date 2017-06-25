@@ -18,25 +18,13 @@
 #ifndef __MZK_OBJECT_H
 #define __MZK_OBJECT_H
 
-#include <unordered_set>
-
-#ifndef __MZK_NO_IMPL
-# define __MZK_NO_IMPL
-# include "shared-object.h"
-# undef __MZK_NO_IMPL
-#else
-# include "shared-object.h"
-#endif
+#include "shared-object.h"
+#include "signal.h"
 
 namespace mzk
 {
-	class object : public shared_object
-	{
-	};
+	class object : public shared_object, public slot_object
+	{};
 }
-
-#ifndef __MZK_NO_IMPL
-# include "bits/object.inl"
-#endif
 
 #endif
