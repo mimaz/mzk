@@ -42,7 +42,7 @@ class test : public mzk::object
 class slot : public mzk::object
 {
   public:
-	void foo(int i)
+	void foo(int i, mzk::object *th)
 	{
 		std::cout << "slot: " << i << std::endl;
 	}
@@ -50,17 +50,24 @@ class slot : public mzk::object
   private:
 };
 
+class third : public mzk::object
+{
+
+};
+
 int main()
 {
 	mzk::ptr<slot> sl = new slot;
+	mzk::ptr<third> th = new third;
 	mzk::signal<int> sig;
 
 
-	auto connection = sig.connect(&slot::foo, sl.raw(), 123);
+	auto connection = sig.connect(&slot::foo, sl, 123, th);
+
 
 	sig(123);
+	delete sl;
 	sig(123);
-
 
 	return 0;
 }
