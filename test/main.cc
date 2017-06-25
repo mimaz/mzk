@@ -22,7 +22,7 @@
 
 class test : public mzk::object
 {
- public:
+  public:
 	test()
 	{
 		std::cout << "constructor" << std::endl;
@@ -39,50 +39,30 @@ class test : public mzk::object
 	}
 };
 
+class slot : public mzk::object
+{
+  public:
+	void foo(int i)
+	{
+		std::cout << "slot: " << i << std::endl;
+	}
+
+  private:
+};
+
 int main()
 {
-	mzk::ptr<mzk::object> ptr = new test;
-
-	ptr.cast<test>()->foo(543);
-
-	std::cout << "ptr: " << ptr << std::endl;
-
-	delete ptr;
-
-	std::cout << "ptr: " << ptr << std::endl;
-
-
+	mzk::ptr<slot> sl = new slot;
 	mzk::signal<int> sig;
-	/*
-
-	auto slot = sig.bind([](int i) {
-		std::cout << "hello!" << i << std::endl;
-	}, std::placeholders::_1);
-
-	sig(4);
-	slot->disconnect();
-	sig(5);
-	sig(6);
 
 
+	auto connection = sig.connect(&slot::foo, sl.raw(), std::placeholders::_1);
+	sl->register_mzk_connection(connection);
 
-	mzk::property<int> prop;
+	sig(123);
 
-	slot = prop.bind([](int value, int old) {
-		std::cout << old << " -> " << value << std::endl;
-	}, std::placeholders::_1, std::placeholders::_2);
+	sig(123);
 
-	prop.set_repeater([](int i) { return i * 5; });
-
-	prop = 5;
-	prop = 6;
-	prop = 6;
-
-	prop.clear_repeater();
-
-
-	prop = 12;
-	*/
 
 	return 0;
 }
