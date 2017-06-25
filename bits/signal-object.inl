@@ -15,28 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_OBJECT_H
-#define __MZK_OBJECT_H
+#ifndef __MZK_BASE_OBJECT_INL
+#define __MZK_BASE_OBJECT_INL
 
-#include <unordered_set>
+#include "../signal-object.h"
 
-#ifndef __MZK_NO_IMPL
-# define __MZK_NO_IMPL
-# include "shared-object.h"
-# undef __MZK_NO_IMPL
-#else
-# include "shared-object.h"
-#endif
+#include "signal.inl"
 
 namespace mzk
 {
-	class object : public shared_object
-	{
-	};
-}
+	inline signal_object::signal_object()
+	{}
 
-#ifndef __MZK_NO_IMPL
-# include "bits/object.inl"
-#endif
+	inline signal_object::~signal_object()
+	{}
+}
 
 #endif

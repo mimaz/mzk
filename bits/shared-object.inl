@@ -15,28 +15,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_OBJECT_H
-#define __MZK_OBJECT_H
+#ifndef __MZK_SHARED_OBJECT_INL
+#define __MZK_SHARED_OBJECT_INL
 
-#include <unordered_set>
+#include "../shared-object.h"
 
-#ifndef __MZK_NO_IMPL
-# define __MZK_NO_IMPL
-# include "shared-object.h"
-# undef __MZK_NO_IMPL
-#else
-# include "shared-object.h"
-#endif
+#include "pointer.inl"
 
 namespace mzk
 {
-	class object : public shared_object
-	{
-	};
-}
+	inline shared_object::shared_object()
+	{}
 
-#ifndef __MZK_NO_IMPL
-# include "bits/object.inl"
-#endif
+	inline shared_object::~shared_object()
+	{}
+
+	inline void shared_object::register_mzk_pointer(
+			base_pointer *ptr,
+			bool strong)
+	{ 
+		if (_ptr_set.find(ptr) == _ptr_set.end())
+		{
+			_ptr_set.insert(ptr); 
+
+			if (strong)
+				_ref_count++;
+		}
+	}
+
+	inline void shared_object::unregister_mzk_pointer(
+			base_pointer *ptr,
+			bool strong)
+	{ 
+		if (_ptr_set.find(ptr) != _ptr_set.end())
+		{
+			_ptr_set.erase(ptr); 
+
+			if (strong)
+			{
+				_ref_count--;
+
+				if (_ref_count < 1)
+					delete this;
+			}
+		}
+	}
+}
 
 #endif

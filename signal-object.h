@@ -15,28 +15,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_OBJECT_H
-#define __MZK_OBJECT_H
-
-#include <unordered_set>
+#ifndef __MZK_BASE_OBJECT_H
+#define __MZK_BASE_OBJECT_H
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
-# include "shared-object.h"
+# include "pointer.h"
 # undef __MZK_NO_IMPL
 #else
-# include "shared-object.h"
+# include "pointer.h"
 #endif
 
 namespace mzk
 {
-	class object : public shared_object
+	class signal_connection
 	{
+	 public:
+		 virtual void disconnect() = 0;
+	};
+
+	class signal_object
+	{
+	 public:
+		signal_object();
+		signal_object(const signal_object &other) = delete;
+		signal_object(signal_object &&other) = delete;
+
+		virtual ~signal_object();
+
+	 private:
 	};
 }
 
 #ifndef __MZK_NO_IMPL
-# include "bits/object.inl"
+# include "bits/signal-object.inl"
 #endif
 
 #endif

@@ -15,28 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_OBJECT_H
-#define __MZK_OBJECT_H
+#ifndef __MZK_SHARED_OBJECT_H
+#define __MZK_SHARED_OBJECT_H
 
 #include <unordered_set>
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
-# include "shared-object.h"
+# include "pointer.h"
 # undef __MZK_NO_IMPL
 #else
-# include "shared-object.h"
+# include "pointer.h"
 #endif
 
 namespace mzk
 {
-	class object : public shared_object
+	class shared_object
 	{
+	  public:
+		shared_object();
+		shared_object(const shared_object &other) = delete;
+		shared_object(shared_object &&other) = delete;
+
+		virtual ~shared_object();
+
+		void register_mzk_pointer(base_pointer *ptr, bool strong);
+		void unregister_mzk_pointer(base_pointer *ptr, bool strong);
+
+	  private:
+		std::unordered_set<base_pointer *> _ptr_set;
+		int _ref_count;
 	};
 }
 
 #ifndef __MZK_NO_IMPL
-# include "bits/object.inl"
+# include "bits/shared-object.inl"
 #endif
 
 #endif
