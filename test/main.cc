@@ -18,8 +18,6 @@
 #include <iostream>
 
 #include <mzk/object.h>
-#include <mzk/signal.h>
-#include <mzk/property.h>
 
 class test : public mzk::object
 {
@@ -44,7 +42,7 @@ int main()
 {
 	mzk::ptr<mzk::object> ptr = new test;
 
-	ptr.as<test>()->foo(543);
+	ptr.cast<test>()->foo(543);
 
 	std::cout << "ptr: " << ptr << std::endl;
 
@@ -53,6 +51,7 @@ int main()
 	std::cout << "ptr: " << ptr << std::endl;
 
 
+	/*
 
 	mzk::signal<int> sig;
 
@@ -83,6 +82,7 @@ int main()
 
 
 	prop = 12;
+	*/
 
 	return 0;
 }
