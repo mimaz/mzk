@@ -108,7 +108,11 @@ namespace mzk
 
 	  template<typename object_type, bool strong>
 	bool pointer<object_type, strong>::operator==(const pointer &ptr) const
-	{ return _pointer == ptr._pointer; }
+	{ return operator==(ptr.raw()); }
+
+	  template<typename object_type, bool strong>
+	bool pointer<object_type, strong>::operator==(const object_type *obj) const
+	{ return raw() == obj; }
 
 	  template<typename object_type, bool strong>
 	inline object_type *pointer<object_type, strong>::raw() const

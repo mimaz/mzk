@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include <mzk/object.h>
+#include <mzk/signal.h>
 
 class test : public mzk::object
 {
@@ -51,9 +52,8 @@ int main()
 	std::cout << "ptr: " << ptr << std::endl;
 
 
-	/*
-
 	mzk::signal<int> sig;
+	/*
 
 	auto slot = sig.bind([](int i) {
 		std::cout << "hello!" << i << std::endl;

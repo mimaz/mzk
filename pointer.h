@@ -57,6 +57,7 @@ namespace mzk
 		pointer &operator=(other_object_type *obj);
 
 		bool operator==(const pointer &ptr) const;
+		bool operator==(const object_type *obj) const;
 
 		object_type *raw() const;
 		operator object_type *() const;
