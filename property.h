@@ -20,61 +20,76 @@
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
-# include "object.h"
 # include "signal.h"
+# include "shared.h"
 # undef __MZK_NO_IMPL
 #else
-# include "object.h"
 # include "signal.h"
+# include "shared.h"
 #endif
 
 namespace mzk
 {
-	template<typename value_type>
-		class property
-		{
-		 public:
-			class repeater;
-
-			property();
-			property(const property &other) = delete;
-			property(property &&other) = delete;
-			property(const value_type &value);
-
-			~property();
-
-
-			property &operator=(const property &other) = delete;
-			property &operator=(property &&other) = delete;
-			property &operator=(const value_type &value);
+	  template<typename value_type>
+	class repeater_interface : public shared_object
+	{
+	  public:
+		virtual value_type pass(const value_type &value) = 0;
+	};
+	
+	  template<typename value_type>
+	using repeater = ptr<repeater_interface<value_type>>;
+	
+	  template<typename value_type, typename functor_type>
+	repeater<value_type> make_repeater(functor_type functor);
 
 
 
-			const value_type &get_value() const;
-			void set_value(const value_type &value);
-		
+	  template<typename value_type>
+	class property : public slot_object
+	{
+	  public:
+		property();
+		property(const property &other) = delete;
+		property(property &&other) = delete;
+		property(const value_type &value);
 
+		~property();
 
-			template<typename functor_type>
-				void set_repeater(const functor_type &functor);
+		property &operator=(const property &other) = delete;
+		property &operator=(property &&other) = delete;
+		property &operator=(const value_type &value);
 
-			void clear_repeater();
+		const value_type &get_value() const;
+		void set_value(const value_type &value);
+	
+		void set_repeater(repeater<value_type> rep);
 
+		  template<typename functor_type>
+		repeater<value_type> set_repeater(functor_type functor);
 
-			template<typename ...bind_arg_types>
-				slot bind(const bind_arg_types &...args);
+		void clear_repeater();
 
-			void unbind(mzk::slot slot);
+		  template<typename method_type,
+				   typename slot_type,
+				   typename ...bind_arg_types>
+		ptr<connection> connect_slot(method_type method, 
+									 slot_type slot, 
+									 const bind_arg_types &...args);
 
-		 private:
-			value_type _value;
-			ptr<repeater> _repeater;
-			signal<value_type, value_type> _signal;
-		};
+		  template<typename functor_type>
+		ptr<connection> connect_lambda(functor_type functor);
+
+		signal<value_type, value_type> sig_changed;
+
+	  private:
+		repeater<value_type> _repeater;
+		value_type _value;
+	};
 }
 
 #ifndef __MZK_NO_IMPL
-# include "bits/property.inl"
+# include "details/property.inl"
 #endif
 
 #endif

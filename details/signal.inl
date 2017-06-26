@@ -18,8 +18,6 @@
 #ifndef __MZK_SIGNAL_INL
 #define __MZK_SIGNAL_INL
 
-#include <functional>
-
 #include "../signal.h"
 
 #include "shared.inl"
@@ -80,14 +78,13 @@ namespace mzk
 	  public:
 		  template<typename ...owner_types>
 		inline specific_connection(
-				const owner_types &...owners)
+				const std::initializer_list<slot_object *> &slot_list)
 		{ 
-			details::for_each_slot([this](slot_object *owner) {
-				_owner_set.push_back(owner);
-			}, owners...);
-
-			for (slot_object *owner : _owner_set)
-				owner->register_mzk_connection(this);
+			for (slot_object *slot : slot_list)
+			{
+				slot->register_mzk_connection(this);
+				_owner_set.push_back(slot);
+			}
 		}
 
 		inline ~specific_connection()
@@ -135,21 +132,19 @@ namespace mzk
 		template<typename method_type, 
 		  		 typename slot_type,
 				 typename ...bind_arg_types>
-	inline ptr<connection> signal<arg_types ...>::connect(
+	inline ptr<connection> signal<arg_types ...>::connect_slot(
 			method_type method,
-			slot_type *slot,
+			slot_type slot,
 			const bind_arg_types &...bind_args)
 	{
-		static_assert(std::is_base_of<slot_object, slot_type>::value);
-
 		class wrapper : public specific_connection<arg_types ...>
 		{
 		  public:
 			inline wrapper(signal *sig, 
 						   method_type method, 
-						   slot_type *slot, 
+						   slot_type slot, 
 						   const bind_arg_types &...bind_args)
-				: specific_connection<arg_types ...>(sig, slot)
+				: specific_connection<arg_types ...>({ sig, slot })
 				, _binding(std::bind(method, slot, bind_args...))
 			{}
 
@@ -159,7 +154,7 @@ namespace mzk
 		  private:
 			  const 
 			details::bind_type<method_type, 
-							   slot_type *, 
+							   slot_type, 
 							   bind_arg_types ...> _binding;
 		};
 
@@ -167,8 +162,31 @@ namespace mzk
 	}
 
 	  template<typename ...arg_types>
+		template<typename functor_type>
+	inline ptr<connection> signal<arg_types ...>::connect_lambda(
+			functor_type functor)
+	{
+		class wrapper : public specific_connection<arg_types ...>
+		{
+		  public:
+			inline wrapper(signal *sig, functor_type functor)
+				: specific_connection<arg_types ...>({ sig })
+				, _functor(functor)
+			{}
+
+			void invoke(const arg_types &...args) const override
+			{ _functor(args...); }
+
+		  private:
+			const functor_type _functor;
+		};
+
+		return new wrapper(this, functor);
+	}
+
+	  template<typename ...arg_types>
 	inline void signal<arg_types ...>::operator()(
-			const arg_types &...args)
+			const arg_types &...args) const
 	{
 		for (const ptr<connection> &conn : _connection_set)
 			conn.cast<specific_connection<arg_types ...>>()->invoke(args...);

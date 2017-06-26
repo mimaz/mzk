@@ -19,54 +19,66 @@
 
 #include <mzk/object.h>
 #include <mzk/signal.h>
+#include <mzk/property.h>
 
-class test : public mzk::object
+class janusz : public mzk::object
 {
   public:
-	test()
+	janusz()
 	{
 		std::cout << "constructor" << std::endl;
 	}
 
-	~test()
+	~janusz()
 	{
 		std::cout << "destructor" << std::endl;
 	}
 
-	void foo(int i)
-	{
-		std::cout << "i: " << i << std::endl;
-	}
-};
-
-class slot : public mzk::object
-{
-  public:
 	void foo(int i, mzk::object *th)
 	{
-		std::cout << "slot: " << i << std::endl;
+		std::cout << "janusz: " << i << std::endl;
 	}
 
   private:
 };
 
-class third : public mzk::object
+class elephant : public mzk::object
 {
 
 };
 
 int main()
 {
-	mzk::ptr<slot> sl = new slot;
-	mzk::ptr<third> th = new third;
+	mzk::ptr<janusz> sl = new janusz;
+	mzk::ptr<elephant> th = new elephant;
 	mzk::signal<int> sig;
 
 
-	auto connection = sig.connect(&slot::foo, sl.raw(), 123, th.raw());
+	auto scon = sig.connect_slot(&janusz::foo, sl.raw(), mzk::arg1, th.raw());
 
 
-	sig(123);
-	sig(123);
+	sig(925);
+	sig(653);
+
+
+	mzk::property<int> prop;
+
+	int addition = 10000;
+	prop.set_repeater(mzk::make_repeater<int>([addition](int v) { return v + addition; }));
+	prop.set_repeater([addition](int v) { return addition + v * 10; });
+
+	auto pcon = prop.connect_lambda([](int n, int o) {
+		std::cout << o << " -> " << n << std::endl;
+	});
+
+
+	prop = 123;
+	prop = 543;
+
+
+	sig.connect_slot(&mzk::property<int>::set_value, &prop, mzk::arg1);
+
+	sig(999);
 
 
 	return 0;
