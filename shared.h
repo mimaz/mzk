@@ -15,17 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_POINTER_INL
-#define __MZK_POINTER_INL
+#ifndef __MZK_SHARED_H
+#define __MZK_SHARED_H
+
+#include <unordered_set>
 
 namespace mzk
 {
-	class object;
-
 	class base_pointer
 	{
 	  public:
 		virtual void on_mzk_object_delete() = 0;
+	};
+
+	class shared_object
+	{
+	  public:
+		shared_object() = default;
+		shared_object(const shared_object &other) = delete;
+		shared_object(shared_object &&other) = delete;
+
+		virtual ~shared_object();
+
+		void register_mzk_pointer(base_pointer *ptr, bool strong);
+		void unregister_mzk_pointer(base_pointer *ptr, bool strong);
+
+	  private:
+		std::unordered_set<base_pointer *> _ptr_set;
+		int _ref_count;
 	};
 
 	  template<typename object_type, bool strong>
@@ -92,8 +109,7 @@ namespace std
 };
 
 #ifndef __MZK_NO_IMPL
-# include "bits/pointer.inl"
+# include "details/shared.inl"
 #endif
 
 #endif
-

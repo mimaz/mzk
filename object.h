@@ -18,7 +18,7 @@
 #ifndef __MZK_OBJECT_H
 #define __MZK_OBJECT_H
 
-#include "shared-object.h"
+#include "shared.h"
 #include "signal.h"
 
 namespace mzk

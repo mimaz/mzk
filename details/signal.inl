@@ -22,41 +22,56 @@
 
 #include "../signal.h"
 
-#include "shared-object.inl"
+#include "shared.inl"
 
 namespace mzk
 {
 	namespace details
 	{
 		  template<typename functor_type>
-		inline void for_each_slot(functor_type functor) 
+		inline void for_each_slot(functor_type)
 		{}
 
 		  template<typename functor_type,
-			  typename arg_type>
+			  	   typename arg_type>
 		inline void for_each_slot(functor_type functor,
-				arg_type *arg)
+								  arg_type *arg)
 		{
-			if (std::is_base_of<slot_object, arg_type>::value)
-				functor(static_cast<slot_object *>(arg));
+			static_assert(std::is_base_of<slot_object, arg_type>::value);
+			functor(arg);
 		}
 
 		  template<typename functor_type,
-			  typename arg_type>
+			  	   typename arg_type,
+				   bool strong>
 		inline void for_each_slot(functor_type functor,
-				arg_type arg)
-		{}
+								  pointer<arg_type, strong> arg)
+		{
+			static_assert(std::is_base_of<slot_object, arg_type>::value);
+			functor(arg);
+		}
 
 		  template<typename functor_type, 
-			  typename arg_type, 
-			  typename ...rest_types>
+				   typename arg_type, 
+				   typename ...rest_types>
 		inline void for_each_slot(functor_type functor, 
-				arg_type arg, 
-				rest_types ...rest)
+								  const arg_type &arg, 
+								  const rest_types &...rest)
 		{
 			for_each_slot(functor, arg);
 			for_each_slot(functor, rest...);
 		}
+
+		  template<typename ...arg_types>
+		struct bind_type_getter
+		{
+			auto operator()(arg_types ...args) 
+				-> decltype(std::bind(args...)) {}
+		};
+
+		  template<typename ...arg_types>
+		using bind_type = typename 
+				std::result_of<bind_type_getter<arg_types ...>(arg_types ...)>::type;
 	}
 
 	  template<typename ...arg_types>
@@ -65,33 +80,30 @@ namespace mzk
 	  public:
 		  template<typename ...owner_types>
 		inline specific_connection(
-				signal<arg_types ...> *sig, 
 				const owner_types &...owners)
-			: _sig(sig)
 		{ 
 			details::for_each_slot([this](slot_object *owner) {
 				_owner_set.push_back(owner);
-				std::cout << "owner found!" << std::endl;
 			}, owners...);
-
-			_sig->register_mzk_connection(this); 
 
 			for (slot_object *owner : _owner_set)
 				owner->register_mzk_connection(this);
 		}
+
+		inline ~specific_connection()
+		{ disconnect(); }
 		 
 		inline void disconnect() override
 		{ 
-			_sig->unregister_mzk_connection(this); 
-
 			for (slot_object *owner : _owner_set)
 				owner->unregister_mzk_connection(this);
+
+			_owner_set.clear();
 		}
 
-		virtual void invoke(const arg_types &...args) = 0;
+		virtual void invoke(const arg_types &...args) const = 0;
 
 	  private:
-		signal<arg_types ...> * const _sig;
 		std::vector<slot_object *> _owner_set;
 	};
 
@@ -99,12 +111,13 @@ namespace mzk
 	 * slot_object class
 	 */
 	
-	inline slot_object::slot_object()
-	{}
-
 	inline slot_object::~slot_object()
 	{
-		for (connection *conn : _connection_set)
+		std::vector<ptr<connection>> tmpset(
+				_connection_set.begin(), 
+				_connection_set.end());
+
+		for (connection *conn : tmpset)
 			conn->disconnect();
 	}
 
@@ -117,58 +130,49 @@ namespace mzk
 	/*
 	 * signal class
 	 */
-
+	
 	  template<typename ...arg_types>
-	inline signal<arg_types ...>::signal()
-	{}
-
-	  template<typename ...arg_types>
-	inline signal<arg_types ...>::~signal()
-	{
-		for (specific_connection<arg_types ...> *conn : _connection_set)
-			conn->disconnect();
-	}
-
-	  template<typename ...arg_types>
-		template<typename ...bind_arg_types>
+		template<typename method_type, 
+		  		 typename slot_type,
+				 typename ...bind_arg_types>
 	inline ptr<connection> signal<arg_types ...>::connect(
-			const bind_arg_types &...args)
+			method_type method,
+			slot_type *slot,
+			const bind_arg_types &...bind_args)
 	{
+		static_assert(std::is_base_of<slot_object, slot_type>::value);
+
 		class wrapper : public specific_connection<arg_types ...>
 		{
 		  public:
-			inline wrapper(signal *sig, const bind_arg_types &...args)
-				: mzk::specific_connection<arg_types ...>(sig, args...)
-				, _binding(std::bind(args...))
+			inline wrapper(signal *sig, 
+						   method_type method, 
+						   slot_type *slot, 
+						   const bind_arg_types &...bind_args)
+				: specific_connection<arg_types ...>(sig, slot)
+				, _binding(std::bind(method, slot, bind_args...))
 			{}
-			 
-			void invoke(const arg_types &...args) override
+
+			void invoke(const arg_types &...args) const override
 			{ _binding(args...); }
 
 		  private:
-			 decltype(std::bind(args...)) _binding;
+			  const 
+			details::bind_type<method_type, 
+							   slot_type *, 
+							   bind_arg_types ...> _binding;
 		};
 
-		return new wrapper(this, args...);
+		return new wrapper(this, method, slot, bind_args...);
 	}
 
 	  template<typename ...arg_types>
 	inline void signal<arg_types ...>::operator()(
 			const arg_types &...args)
 	{
-		for (specific_connection<arg_types ...> *conn : _connection_set)
-			conn->invoke(args...);
+		for (const ptr<connection> &conn : _connection_set)
+			conn.cast<specific_connection<arg_types ...>>()->invoke(args...);
 	}
-
-	  template<typename ...arg_types>
-	inline void signal<arg_types ...>::register_mzk_connection(
-			specific_connection<arg_types ...> *conn)
-	{ _connection_set.insert(conn); }
-
-	  template<typename ...arg_types>
-	inline void signal<arg_types ...>::unregister_mzk_connection(
-			specific_connection<arg_types ...> *conn)
-	{ _connection_set.erase(conn); }
 }
 
 #endif

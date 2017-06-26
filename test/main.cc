@@ -62,12 +62,12 @@ int main()
 	mzk::signal<int> sig;
 
 
-	auto connection = sig.connect(&slot::foo, sl, 123, th);
+	auto connection = sig.connect(&slot::foo, sl.raw(), 123, th.raw());
 
 
 	sig(123);
-	delete sl;
 	sig(123);
+
 
 	return 0;
 }

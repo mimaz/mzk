@@ -23,10 +23,10 @@
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
-# include "shared-object.h"
+# include "shared.h"
 # undef __MZK_NO_IMPL
 #else
-# include "shared-object.h"
+# include "shared.h"
 #endif
 
 namespace mzk
@@ -42,7 +42,7 @@ namespace mzk
 	class slot_object
 	{
 	  public:
-		slot_object();
+		slot_object() = default;
 		slot_object(const slot_object &other) = delete;
 		slot_object(slot_object &&other) = delete;
 		virtual ~slot_object();
@@ -52,6 +52,9 @@ namespace mzk
 	 
 	  private:
 		std::unordered_set<ptr<connection>> _connection_set;
+
+		  template<typename ...>
+		friend class signal;
 	};
 
 	  template<typename ...arg_types>
@@ -61,24 +64,19 @@ namespace mzk
 	class signal : public slot_object
 	{
 	  public:
-		signal();
-		~signal();
-
-		  template<typename ...bind_arg_types>
-		ptr<connection> connect(const bind_arg_types &...args);
+		  template<typename method_type,
+			  	   typename slot_type,
+				   typename ...bind_arg_types>
+		ptr<connection> connect(method_type method, 
+								slot_type *slot,
+								const bind_arg_types &...bind_args);
 
 		void operator()(const arg_types &...args);
-
-		void register_mzk_connection(specific_connection<arg_types ...> *conn);
-		void unregister_mzk_connection(specific_connection<arg_types ...> *conn);
-
-	 private:
-		std::unordered_set<ptr<specific_connection<arg_types ...>>> _connection_set;
 	};
 }
 
 #ifndef __MZK_NO_IMPL
-# include "bits/signal.inl"
+# include "details/signal.inl"
 #endif
 
 #endif

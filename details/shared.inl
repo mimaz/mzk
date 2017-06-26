@@ -15,15 +15,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_POINTER_H
-#define __MZK_POINTER_H
+#ifndef __MZK_SHARED_INL
+#define __MZK_SHARED_INL
 
-#include "../pointer.h"
-
-#include "shared-object.inl"
+#include "../shared.h"
 
 namespace mzk
 {
+	/*
+	 * shared_object class
+	 */
+
+	inline shared_object::~shared_object()
+	{
+		for (base_pointer *ptr : _ptr_set)
+			ptr->on_mzk_object_delete();
+	}
+
+	inline void shared_object::register_mzk_pointer(
+			base_pointer *ptr,
+			bool strong)
+	{ 
+		if (_ptr_set.find(ptr) == _ptr_set.end())
+		{
+			_ptr_set.insert(ptr); 
+
+			if (strong)
+				_ref_count++;
+		}
+	}
+
+	inline void shared_object::unregister_mzk_pointer(
+			base_pointer *ptr,
+			bool strong)
+	{ 
+		if (_ptr_set.find(ptr) != _ptr_set.end())
+		{
+			_ptr_set.erase(ptr); 
+
+			if (strong)
+			{
+				_ref_count--;
+
+				if (_ref_count < 1)
+					delete this;
+			}
+		}
+	}
+
+	/*
+	 * pointer class
+	 */
+
 	  template<typename object_type, bool strong>
 	inline pointer<object_type, strong>::pointer()
 		: _pointer(nullptr)
