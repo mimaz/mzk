@@ -18,8 +18,9 @@
 #ifndef __MZK_SIGNAL_H
 #define __MZK_SIGNAL_H
 
-#include <vector>
 #include <unordered_set>
+#include <functional>
+#include <vector>
 
 #ifndef __MZK_NO_IMPL
 # define __MZK_NO_IMPL
@@ -67,12 +68,25 @@ namespace mzk
 		  template<typename method_type,
 			  	   typename slot_type,
 				   typename ...bind_arg_types>
-		ptr<connection> connect(method_type method, 
-								slot_type *slot,
-								const bind_arg_types &...bind_args);
+		ptr<connection> connect_slot(method_type method, 
+									 slot_type slot,
+									 const bind_arg_types &...bind_args);
 
-		void operator()(const arg_types &...args);
+		  template<typename functor_type>
+		ptr<connection> connect_lambda(functor_type functor);
+
+		void operator()(const arg_types &...args) const;
 	};
+
+	constexpr auto arg1 = std::placeholders::_1;
+	constexpr auto arg2 = std::placeholders::_2;
+	constexpr auto arg3 = std::placeholders::_3;
+	constexpr auto arg4 = std::placeholders::_4;
+	constexpr auto arg5 = std::placeholders::_5;
+	constexpr auto arg6 = std::placeholders::_6;
+	constexpr auto arg7 = std::placeholders::_7;
+	constexpr auto arg8 = std::placeholders::_8;
+	constexpr auto arg9 = std::placeholders::_9;
 }
 
 #ifndef __MZK_NO_IMPL
