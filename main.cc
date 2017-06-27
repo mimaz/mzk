@@ -21,6 +21,7 @@
 #include <mzk/signal.h>
 #include <mzk/property.h>
 #include <mzk/timer.h>
+#include <mzk/state.h>
 #include <mzk/timer-loop.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
