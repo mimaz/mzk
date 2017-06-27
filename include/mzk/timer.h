@@ -18,17 +18,15 @@
 #ifndef __MZK_TIMER_H
 #define __MZK_TIMER_H
 
-#include "shared.h"
-#include "signal.h"
+#include "object.h"
 #include "property.h"
 
 namespace mzk
 {
-	class timer : public shared, public signaled
+	class timer : public object
 	{
 	  public:
 		using millis_type = unsigned long long;
-		const int infinite = -1;
 
 		timer();
 		~timer();

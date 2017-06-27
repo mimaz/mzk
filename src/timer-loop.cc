@@ -15,52 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <mzk/timer.h>
-
-#include "timer-thread.h"
+#include <mzk/timer-loop.h>
 
 namespace mzk
 {
-	timer::timer()
-	{
-		this_timer_set.insert(this);
 
-		prop_running.connect_slot(&timer::_on_running_changed, this, arg1);
-
-		prop_running = false;
-		prop_ticks = -1;
-		prop_delay = 0;
-		prop_period = 1000;
-	}
-
-	timer::~timer()
-	{
-		this_timer_set.erase(this);
-	}
-
-	void timer::mzk_notify()
-	{
-		if (prop_running &&
-				_next_time <= get_current_time())
-		{
-			sig_triggered();
-
-			if (_ticks_left > 0)
-				_ticks_left--;
-
-			if (_ticks_left)
-				_next_time += prop_period;
-			else
-				prop_running = false;
-		}
-	}
-
-	void timer::_on_running_changed(bool running)
-	{
-		if (running)
-		{
-			_ticks_left = prop_ticks;
-			_next_time = get_current_time() + prop_delay;
-		}
-	}
 }

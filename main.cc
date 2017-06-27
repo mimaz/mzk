@@ -22,7 +22,7 @@
 #include <mzk/property.h>
 #include <mzk/timer.h>
 
-class janusz : public mzk::shared, public mzk::signaled
+class janusz : public mzk::shared_object, public mzk::slot_object
 {
   public:
 	janusz()
@@ -35,7 +35,7 @@ class janusz : public mzk::shared, public mzk::signaled
 		std::cout << "destructor" << std::endl;
 	}
 
-	void foo(int i, mzk::shared *th)
+	void foo(int i, mzk::shared_object *th)
 	{
 		std::cout << "janusz: " << i << std::endl;
 	}
@@ -43,7 +43,7 @@ class janusz : public mzk::shared, public mzk::signaled
   private:
 };
 
-class elephant : public mzk::shared, public mzk::signaled
+class elephant : public mzk::shared_object, public mzk::slot_object
 {
 
 };
@@ -86,7 +86,7 @@ int main()
 	mzk::timer tim;
 	tim.prop_ticks = 5;
 	tim.prop_period = 100;
-	tim.prop_delay = 1500;
+	tim.prop_delay = 200;
 
 	tim.sig_triggered.connect_lambda([]() {
 		std::cout << "hello, world!" << std::endl;

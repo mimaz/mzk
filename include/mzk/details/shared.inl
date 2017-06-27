@@ -23,16 +23,16 @@
 namespace mzk
 {
 	/*
-	 * shared class
+	 * shared_object class
 	 */
 
-	inline shared::~shared()
+	inline shared_object::~shared_object()
 	{
 		for (pointer *ptr : _ptr_set)
 			ptr->on_mzk_object_delete();
 	}
 
-	inline void shared::register_mzk_pointer(
+	inline void shared_object::register_mzk_pointer(
 			pointer *ptr,
 			bool strong)
 	{ 
@@ -45,7 +45,7 @@ namespace mzk
 		}
 	}
 
-	inline void shared::unregister_mzk_pointer(
+	inline void shared_object::unregister_mzk_pointer(
 			pointer *ptr,
 			bool strong)
 	{ 

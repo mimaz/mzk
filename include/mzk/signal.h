@@ -32,21 +32,21 @@
 
 namespace mzk
 {
-	class signaled;
+	class slot_object;
 
-	class connection : public shared
+	class connection : public shared_object
 	{
 	  public:
 		virtual void disconnect() = 0;
 	};
 
-	class signaled
+	class slot_object
 	{
 	  public:
-		signaled() = default;
-		signaled(const signaled &other) = delete;
-		signaled(signaled &&other) = delete;
-		virtual ~signaled();
+		slot_object() = default;
+		slot_object(const slot_object &other) = delete;
+		slot_object(slot_object &&other) = delete;
+		virtual ~slot_object();
 
 		void register_mzk_connection(connection *conn);
 		void unregister_mzk_connection(connection *conn);
@@ -62,7 +62,7 @@ namespace mzk
 	class specific_connection;
 
 	  template<typename ...arg_types>
-	class signal : public signaled
+	class signal : public slot_object
 	{
 	  public:
 		  template<typename method_type,

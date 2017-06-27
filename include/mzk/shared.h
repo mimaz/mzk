@@ -22,7 +22,7 @@
 
 namespace mzk
 {
-	class shared
+	class shared_object
 	{
 	  public:
 		class pointer
@@ -31,11 +31,11 @@ namespace mzk
 			virtual void on_mzk_object_delete() = 0;
 		};
 
-		shared() = default;
-		shared(const shared &other) = delete;
-		shared(shared &&other) = delete;
+		shared_object() = default;
+		shared_object(const shared_object &other) = delete;
+		shared_object(shared_object &&other) = delete;
 
-		virtual ~shared();
+		virtual ~shared_object();
 
 		void register_mzk_pointer(pointer *ptr, bool strong);
 		void unregister_mzk_pointer(pointer *ptr, bool strong);
@@ -46,7 +46,7 @@ namespace mzk
 	};
 
 	  template<typename object_type, bool strong>
-	class pointer : public shared::pointer
+	class pointer : public shared_object::pointer
 	{
 	  public:
 		pointer();

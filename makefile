@@ -1,4 +1,4 @@
-sources = main.cc src/timer.cc src/timer-thread.cc
+sources = main.cc src/timer.cc src/timer-thread.cc src/timer-loop.cc
 builddir = /tmp/mzk
 
 objects = ${sources:%.cc=${builddir}/%.o}
