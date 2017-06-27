@@ -1,2 +1,8 @@
 *.swp
 ./test
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+libmzk.a
+Makefile
+mzk-test
