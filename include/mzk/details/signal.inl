@@ -69,30 +69,6 @@ namespace mzk
 	  private:
 		std::vector<slot_object *> _owner_set;
 	};
-
-  	/*
-	 * slot_object class
-	 */
-	
-	inline slot_object::~slot_object()
-	{
-		std::vector<ptr<connection>> tmpset(
-				_connection_set.begin(), 
-				_connection_set.end());
-
-		for (connection *conn : tmpset)
-			conn->disconnect();
-	}
-
-	inline void slot_object::register_mzk_connection(connection *conn)
-	{ _connection_set.insert(conn); }
-
-	inline void slot_object::unregister_mzk_connection(connection *conn)
-	{ _connection_set.erase(conn); }
-
-	/*
-	 * signal class
-	 */
 	
 	  template<typename ...arg_types>
 		template<typename method_type, 
@@ -162,6 +138,26 @@ namespace mzk
 	inline void signal<arg_types ...>::operator()(
 			const arg_types &...args) const
 	{ send(args...); }
+
+	extern template class signal<>;
+	extern template class signal<bool>;
+	extern template class signal<bool, bool>;
+	extern template class signal<char>;
+	extern template class signal<char, char>;
+	extern template class signal<unsigned char>;
+	extern template class signal<unsigned char, unsigned char>;
+	extern template class signal<short>;
+	extern template class signal<short, short>;
+	extern template class signal<unsigned short>;
+	extern template class signal<unsigned short, unsigned short>;
+	extern template class signal<int>;
+	extern template class signal<int, int>;
+	extern template class signal<unsigned int>;
+	extern template class signal<unsigned int, unsigned int>;
+	extern template class signal<long>;
+	extern template class signal<long, long>;
+	extern template class signal<unsigned long>;
+	extern template class signal<unsigned long, unsigned long>;
 }
 
 #endif

@@ -47,8 +47,6 @@ namespace mzk
 		return new wrapper(functor);
 	}
 
-
-
 	  template<typename value_type>
 	inline property<value_type>::property()
 		: property(value_type())
@@ -99,30 +97,28 @@ namespace mzk
 	  template<typename value_type>
 	inline property<value_type> &property<value_type>::operator--()
 	{ 
-		value_type value = get_value();
-		return operator=(--value); 
+		return operator=(get_value() - 1); 
 	}
 
 	  template<typename value_type>
 	inline value_type property<value_type>::operator--(int)
 	{ 
 		value_type old = get_value();
-		operator--();
+		operator=(get_value() - 1);
 		return old;
 	}
 
 	  template<typename value_type>
 	inline property<value_type> &property<value_type>::operator++()
 	{ 
-		value_type value = get_value();
-		return operator=(++value); 
+		return operator=(get_value() + 1); 
 	}
 
 	  template<typename value_type>
 	inline value_type property<value_type>::operator++(int)
 	{ 
 		value_type old = get_value();
-		operator++();
+		operator=(get_value() + 1);
 		return old;
 	}
 
@@ -183,6 +179,16 @@ namespace mzk
 	inline ptr<connection> property<value_type>::connect_lambda(
 			functor_type functor)
 	{ return sig_changed.connect_lambda(functor); }
+	
+	extern template class property<bool>;
+	extern template class property<char>;
+	extern template class property<unsigned char>;
+	extern template class property<short>;
+	extern template class property<unsigned short>;
+	extern template class property<int>;
+	extern template class property<unsigned int>;
+	extern template class property<long>;
+	extern template class property<unsigned long>;
 }
 
 #endif
