@@ -26,40 +26,6 @@ namespace mzk
 {
 	namespace details
 	{
-		  template<typename functor_type>
-		inline void for_each_slot(functor_type)
-		{}
-
-		  template<typename functor_type,
-			  	   typename arg_type>
-		inline void for_each_slot(functor_type functor,
-								  arg_type *arg)
-		{
-			static_assert(std::is_base_of<slot_object, arg_type>::value);
-			functor(arg);
-		}
-
-		  template<typename functor_type,
-			  	   typename arg_type,
-				   bool strong>
-		inline void for_each_slot(functor_type functor,
-								  pointer<arg_type, strong> arg)
-		{
-			static_assert(std::is_base_of<slot_object, arg_type>::value);
-			functor(arg);
-		}
-
-		  template<typename functor_type, 
-				   typename arg_type, 
-				   typename ...rest_types>
-		inline void for_each_slot(functor_type functor, 
-								  const arg_type &arg, 
-								  const rest_types &...rest)
-		{
-			for_each_slot(functor, arg);
-			for_each_slot(functor, rest...);
-		}
-
 		  template<typename ...arg_types>
 		struct bind_type_getter
 		{
