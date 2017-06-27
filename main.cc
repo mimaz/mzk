@@ -17,8 +17,9 @@
 
 #include <iostream>
 
-#include "signal.h"
-#include "property.h"
+#include <mzk/signal.h>
+#include <mzk/property.h>
+#include <mzk/threaded.h>
 
 class janusz : public mzk::shared, public mzk::signaled
 {
@@ -78,6 +79,10 @@ int main()
 	sig.connect_slot(&mzk::property<int>::set_value, &prop, mzk::arg1);
 
 	sig(999);
+
+
+
+	mzk::threaded thr = mzk::threaded();
 
 
 	return 0;

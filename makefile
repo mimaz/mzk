@@ -1,23 +1,23 @@
-sources = main.cc
+sources = main.cc src/threaded.cc src/thread-data.cc
 builddir = /tmp/mzk
 
 objects = ${sources:%.cc=${builddir}/%.o}
 depfiles = ${objects:%.o=%.d}
 
-all: mzk
+all: test
 
-run: mzk
-	./mzk
+run: test
+	./test
 
 clean:
-	rm -f mzk ${builddir} -r
+	rm -f test ${builddir} -r
 
-mzk: ${objects}
+test: ${objects}
 	g++ ${objects} -o $@
 
 ${builddir}/%.o: %.cc
 	@mkdir -p ${dir $@}
-	g++ -c $< -o $@ -std=c++14 -Wall -Og -MMD
+	g++ -c $< -o $@ -std=c++14 -Wall -Og -MMD -Iinclude/
 
 -include ${depfiles}
 
