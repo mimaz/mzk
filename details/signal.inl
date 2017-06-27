@@ -44,9 +44,9 @@ namespace mzk
 	  public:
 		  template<typename ...owner_types>
 		inline specific_connection(
-				const std::initializer_list<slot_object *> &slot_list)
+				const std::initializer_list<signaled *> &slot_list)
 		{ 
-			for (slot_object *slot : slot_list)
+			for (signaled *slot : slot_list)
 			{
 				slot->register_mzk_connection(this);
 				_owner_set.push_back(slot);
@@ -58,7 +58,7 @@ namespace mzk
 		 
 		inline void disconnect() override
 		{ 
-			for (slot_object *owner : _owner_set)
+			for (signaled *owner : _owner_set)
 				owner->unregister_mzk_connection(this);
 
 			_owner_set.clear();
@@ -67,14 +67,14 @@ namespace mzk
 		virtual void invoke(const arg_types &...args) const = 0;
 
 	  private:
-		std::vector<slot_object *> _owner_set;
+		std::vector<signaled *> _owner_set;
 	};
 
   	/*
-	 * slot_object class
+	 * signaled class
 	 */
 	
-	inline slot_object::~slot_object()
+	inline signaled::~signaled()
 	{
 		std::vector<ptr<connection>> tmpset(
 				_connection_set.begin(), 
@@ -84,10 +84,10 @@ namespace mzk
 			conn->disconnect();
 	}
 
-	inline void slot_object::register_mzk_connection(connection *conn)
+	inline void signaled::register_mzk_connection(connection *conn)
 	{ _connection_set.insert(conn); }
 
-	inline void slot_object::unregister_mzk_connection(connection *conn)
+	inline void signaled::unregister_mzk_connection(connection *conn)
 	{ _connection_set.erase(conn); }
 
 	/*

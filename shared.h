@@ -22,31 +22,31 @@
 
 namespace mzk
 {
-	class base_pointer
+	class shared
 	{
 	  public:
-		virtual void on_mzk_object_delete() = 0;
-	};
+		class pointer
+		{
+		  public:
+			virtual void on_mzk_object_delete() = 0;
+		};
 
-	class shared_object
-	{
-	  public:
-		shared_object() = default;
-		shared_object(const shared_object &other) = delete;
-		shared_object(shared_object &&other) = delete;
+		shared() = default;
+		shared(const shared &other) = delete;
+		shared(shared &&other) = delete;
 
-		virtual ~shared_object();
+		virtual ~shared();
 
-		void register_mzk_pointer(base_pointer *ptr, bool strong);
-		void unregister_mzk_pointer(base_pointer *ptr, bool strong);
+		void register_mzk_pointer(pointer *ptr, bool strong);
+		void unregister_mzk_pointer(pointer *ptr, bool strong);
 
 	  private:
-		std::unordered_set<base_pointer *> _ptr_set;
+		std::unordered_set<pointer *> _ptr_set;
 		int _ref_count;
 	};
 
 	  template<typename object_type, bool strong>
-	class pointer : public base_pointer
+	class pointer : public shared::pointer
 	{
 	  public:
 		pointer();

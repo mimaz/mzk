@@ -31,7 +31,7 @@
 namespace mzk
 {
 	  template<typename value_type>
-	class repeater_interface : public shared_object
+	class repeater_interface : public shared
 	{
 	  public:
 		virtual value_type pass(const value_type &value) = 0;
@@ -46,7 +46,7 @@ namespace mzk
 
 
 	  template<typename value_type>
-	class property : public slot_object
+	class property : public signaled
 	{
 	  public:
 		property();

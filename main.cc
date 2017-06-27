@@ -17,11 +17,10 @@
 
 #include <iostream>
 
-#include "object.h"
 #include "signal.h"
 #include "property.h"
 
-class janusz : public mzk::object
+class janusz : public mzk::shared, public mzk::signaled
 {
   public:
 	janusz()
@@ -34,7 +33,7 @@ class janusz : public mzk::object
 		std::cout << "destructor" << std::endl;
 	}
 
-	void foo(int i, mzk::object *th)
+	void foo(int i, mzk::shared *th)
 	{
 		std::cout << "janusz: " << i << std::endl;
 	}
@@ -42,7 +41,7 @@ class janusz : public mzk::object
   private:
 };
 
-class elephant : public mzk::object
+class elephant : public mzk::shared, public mzk::signaled
 {
 
 };
