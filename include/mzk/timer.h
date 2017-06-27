@@ -26,8 +26,6 @@ namespace mzk
 	class timer : public object
 	{
 	  public:
-		using millis_type = unsigned long long;
-
 		timer();
 		~timer();
 
@@ -36,15 +34,17 @@ namespace mzk
 		property<int> prop_delay;
 		property<int> prop_period;
 
+		signal<> sig_started;
+		signal<> sig_stopped;
 		signal<> sig_triggered;
 
-		void mzk_notify();
+		bool mzk_notify();
 
 	  private:
 		void _on_running_changed(bool);
 
 		int _ticks_left;
-		millis_type _next_time;
+		time_t _next_time;
 	};
 }
 

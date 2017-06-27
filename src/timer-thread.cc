@@ -23,7 +23,7 @@ namespace mzk
 {
 	thread_local std::unordered_set<timer *> this_timer_set;
 
-	timer::millis_type get_current_time()
+	time_t get_current_time()
 	{
 		struct timespec ts;
 		clock_gettime(CLOCK_MONOTONIC, &ts);

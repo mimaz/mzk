@@ -25,7 +25,14 @@ namespace mzk
 	class timer_loop : public object
 	{
 	  public:
-		timer_loop();
+		void start();
+		void stop();
+
+		signal<> sig_started;
+		signal<> sig_stopped;
+	
+	  private:
+		bool _run_flag;
 	};
 }
 

@@ -15,18 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_TIMER_LOOP_H
-#define __MZK_TIMER_LOOP_H
+#ifndef __MZK_TIMER_THREAD_H
+#define __MZK_TIMER_THREAD_H
 
 #include <unordered_set>
 
-#include <mzk/timer.h>
-
 namespace mzk
 {
+	class timer;
+
 	extern thread_local std::unordered_set<timer *> this_timer_set;
 
-	timer::millis_type get_current_time();
+	time_t get_current_time();
 }
 
 #endif

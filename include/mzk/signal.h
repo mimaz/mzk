@@ -75,6 +75,8 @@ namespace mzk
 		  template<typename functor_type>
 		ptr<connection> connect_lambda(functor_type functor);
 
+		void send(const arg_types &...args) const;
+
 		void operator()(const arg_types &...args) const;
 	};
 

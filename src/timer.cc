@@ -25,7 +25,8 @@ namespace mzk
 	{
 		this_timer_set.insert(this);
 
-		prop_running.connect_slot(&timer::_on_running_changed, this, arg1);
+		prop_running.connect_slot(&timer::_on_running_changed, 
+								  this, arg1);
 
 		prop_running = false;
 		prop_ticks = -1;
@@ -38,7 +39,7 @@ namespace mzk
 		this_timer_set.erase(this);
 	}
 
-	void timer::mzk_notify()
+	bool timer::mzk_notify()
 	{
 		if (prop_running &&
 				_next_time <= get_current_time())
@@ -52,7 +53,11 @@ namespace mzk
 				_next_time += prop_period;
 			else
 				prop_running = false;
+
+			return true;
 		}
+
+		return false;
 	}
 
 	void timer::_on_running_changed(bool running)
@@ -61,6 +66,12 @@ namespace mzk
 		{
 			_ticks_left = prop_ticks;
 			_next_time = get_current_time() + prop_delay;
+
+			sig_started();
+		}
+		else
+		{
+			sig_stopped();
 		}
 	}
 }

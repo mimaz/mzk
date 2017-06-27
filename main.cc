@@ -21,6 +21,7 @@
 #include <mzk/signal.h>
 #include <mzk/property.h>
 #include <mzk/timer.h>
+#include <mzk/timer-loop.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
 {
@@ -94,11 +95,12 @@ int main()
 
 	tim.prop_running = true;
 
-	while (tim.prop_running)
-	{
-		tim.mzk_notify();
-		std::this_thread::yield();
-	}
+	mzk::ptr<mzk::timer_loop> loop = new mzk::timer_loop;
+
+
+	tim.sig_stopped.connect_slot(&mzk::timer_loop::stop, loop);
+
+	loop->start();
 
 
 	return 0;

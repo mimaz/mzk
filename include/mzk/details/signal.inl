@@ -151,12 +151,17 @@ namespace mzk
 	}
 
 	  template<typename ...arg_types>
-	inline void signal<arg_types ...>::operator()(
+	inline void signal<arg_types ...>::send(
 			const arg_types &...args) const
 	{
 		for (const ptr<connection> &conn : _connection_set)
 			conn.cast<specific_connection<arg_types ...>>()->invoke(args...);
 	}
+
+	  template<typename ...arg_types>
+	inline void signal<arg_types ...>::operator()(
+			const arg_types &...args) const
+	{ send(args...); }
 }
 
 #endif

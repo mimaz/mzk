@@ -15,9 +15,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <thread>
+
 #include <mzk/timer-loop.h>
+#include <mzk/timer.h>
+
+#include "timer-thread.h"
 
 namespace mzk
 {
+	void timer_loop::start()
+	{
+		_run_flag = true;
 
+		sig_started();
+
+
+		while (_run_flag)
+		{
+			bool noyield = false;
+
+			for (timer *tm : this_timer_set)
+				noyield = noyield || tm->mzk_notify();
+
+			if (! noyield)
+				std::this_thread::yield();
+		}
+
+
+		sig_stopped();
+	}
+
+	void timer_loop::stop()
+	{
+		_run_flag = false;
+	}
 }
