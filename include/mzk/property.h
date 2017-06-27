@@ -60,6 +60,28 @@ namespace mzk
 		property &operator=(property &&other) = delete;
 		property &operator=(const value_type &value);
 
+		  template<typename other_type>
+		property &operator+=(const other_type &value);
+
+		  template<typename other_type>
+		property &operator-=(const other_type &value);
+
+		  template<typename other_type>
+		property &operator*=(const other_type &value);
+
+		  template<typename other_type>
+		property &operator/=(const other_type &value);
+
+		property &operator--();
+
+		value_type operator--(int);
+
+		property &operator++();
+
+		value_type operator++(int);
+
+		operator value_type() const;
+
 		const value_type &get_value() const;
 		void set_value(const value_type &value);
 	

@@ -15,22 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <mzk/threaded.h>
-#include <iostream>
+#ifndef __MZK_TIMER_LOOP_H
+#define __MZK_TIMER_LOOP_H
 
-#include "thread-data.h"
+#include <unordered_set>
+
+#include <mzk/timer.h>
 
 namespace mzk
 {
-	threaded::threaded()
-	{ this_thread_data::register_object(this); }
+	extern thread_local std::unordered_set<timer *> this_timer_set;
 
-	threaded::~threaded()
-	{ this_thread_data::unregister_object(this); }
-
-	std::thread::id threaded::get_thread_id() const
-	{ return _thread_id; }
-
-	void threaded::mzk_notify()
-	{ std::cout << "mzk_notify!" << std::endl; }
+	timer::millis_type get_current_time();
 }
+
+#endif

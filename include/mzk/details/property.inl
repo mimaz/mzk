@@ -73,6 +73,64 @@ namespace mzk
 	}
 
 	  template<typename value_type>
+		template<typename other_type>
+	inline property<value_type> &property<value_type>::operator+=(
+			const other_type &value)
+	{ return operator=(get_value() + value); }
+
+	  template<typename value_type>
+		template<typename other_type>
+	inline property<value_type> &property<value_type>::operator-=(
+			const other_type &value)
+	{ return operator=(get_value() - value); }
+
+	  template<typename value_type>
+		template<typename other_type>
+	inline property<value_type> &property<value_type>::operator*=(
+			const other_type &value)
+	{ return operator=(get_value() * value); }
+
+	  template<typename value_type>
+		template<typename other_type>
+	inline property<value_type> &property<value_type>::operator/=(
+			const other_type &value)
+	{ return operator=(get_value() / value); }
+
+	  template<typename value_type>
+	inline property<value_type> &property<value_type>::operator--()
+	{ 
+		value_type value = get_value();
+		return operator=(--value); 
+	}
+
+	  template<typename value_type>
+	inline value_type property<value_type>::operator--(int)
+	{ 
+		value_type old = get_value();
+		operator--();
+		return old;
+	}
+
+	  template<typename value_type>
+	inline property<value_type> &property<value_type>::operator++()
+	{ 
+		value_type value = get_value();
+		return operator=(++value); 
+	}
+
+	  template<typename value_type>
+	inline value_type property<value_type>::operator++(int)
+	{ 
+		value_type old = get_value();
+		operator++();
+		return old;
+	}
+
+	  template<typename value_type>
+	inline property<value_type>::operator value_type() const
+	{ return get_value(); }
+
+	  template<typename value_type>
 	inline const value_type &property<value_type>::get_value() const
 	{ return _value; }
 

@@ -16,10 +16,11 @@
  */
 
 #include <iostream>
+#include <thread>
 
 #include <mzk/signal.h>
 #include <mzk/property.h>
-#include <mzk/threaded.h>
+#include <mzk/timer.h>
 
 class janusz : public mzk::shared, public mzk::signaled
 {
@@ -82,7 +83,22 @@ int main()
 
 
 
-	mzk::threaded thr = mzk::threaded();
+	mzk::timer tim;
+	tim.prop_ticks = 5;
+	tim.prop_period = 100;
+	tim.prop_delay = 1500;
+
+	tim.sig_triggered.connect_lambda([]() {
+		std::cout << "hello, world!" << std::endl;
+	});
+
+	tim.prop_running = true;
+
+	while (tim.prop_running)
+	{
+		tim.mzk_notify();
+		std::this_thread::yield();
+	}
 
 
 	return 0;

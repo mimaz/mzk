@@ -15,25 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_THREADED_H
-#define __MZK_THREADED_H
+#ifndef __MZK_TIMER_H
+#define __MZK_TIMER_H
 
-#include <thread>
+#include "shared.h"
+#include "signal.h"
+#include "property.h"
 
 namespace mzk
 {
-	class threaded
+	class timer : public shared, public signaled
 	{
 	  public:
-		threaded();
-		virtual ~threaded();
+		using millis_type = unsigned long long;
+		const int infinite = -1;
 
-		std::thread::id get_thread_id() const;
+		timer();
+		~timer();
 
-		virtual void mzk_notify();
-	
+		property<bool> prop_running;
+		property<int> prop_ticks;
+		property<int> prop_delay;
+		property<int> prop_period;
+
+		signal<> sig_triggered;
+
+		void mzk_notify();
+
 	  private:
-		const std::thread::id _thread_id;
+		void _on_running_changed(bool);
+
+		int _ticks_left;
+		millis_type _next_time;
 	};
 }
 

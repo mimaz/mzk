@@ -15,44 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_THREAD_DATA_H
-#define __MZK_THREAD_DATA_H
+#include <ctime>
 
-#include <unordered_set>
-
-#include <mzk/threaded.h>
-#include <mzk/shared.h>
+#include "timer-thread.h"
 
 namespace mzk
 {
-	class thread_data : public shared
+	thread_local std::unordered_set<timer *> this_timer_set;
+
+	timer::millis_type get_current_time()
 	{
-	  public:
-		typedef std::unordered_set<threaded *> threaded_set;
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
 
-		void register_object(threaded *obj);
-		void unregister_object(threaded *obj);
-
-		void notify_all();
-
-		const threaded_set &get_object_set() const;
-	
-	  private:
-		threaded_set _object_set;
-	};
-
-	namespace this_thread_data
-	{
-		thread_data *instance();
-
-		void register_object(threaded *obj);
-
-		void unregister_object(threaded *obj);
-
-		void notify_all();
-
-		const thread_data::threaded_set &get_object_set();
+		return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 	}
 }
-
-#endif
