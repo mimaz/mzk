@@ -21,7 +21,7 @@
 #include <mzk/signal.h>
 #include <mzk/property.h>
 #include <mzk/timer.h>
-#include <mzk/state.h>
+#include <mzk/state-machine.h>
 #include <mzk/timer-loop.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
@@ -102,6 +102,24 @@ int main()
 	tim.sig_stopped.connect_slot(&mzk::timer_loop::stop, loop);
 
 	loop->start();
+
+
+	enum stateid 
+	{
+		MENU,
+		GAME,
+		ABOUT,
+	};
+
+	mzk::state_machine<3, stateid> machine(MENU);
+	machine.prop_active_id.connect_lambda([](int id, int old) {
+		std::cout << "id: " << id << std::endl;
+	});
+
+	machine.prop_active = true;
+	machine.prop_active_id = GAME;
+
+	machine.transit<GAME, ABOUT>();
 
 
 	return 0;
