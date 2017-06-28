@@ -27,14 +27,14 @@ namespace mzk
 		thread_local std::unordered_set<timer *> timer_set;
 		thread_local bool running_loop;
 		thread_local time_t next_time;
+	}
 
-		time_t get_current_time()
-		{
-			struct timespec ts;
-			clock_gettime(CLOCK_MONOTONIC, &ts);
+	time_t timer::get_current_time()
+	{
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
 
-			return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
-		}
+		return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 	}
 
 	void timer::start_loop()

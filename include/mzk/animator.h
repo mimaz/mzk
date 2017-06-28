@@ -15,45 +15,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MZK_TIMER_H
-#define __MZK_TIMER_H
+#ifndef __MZK_ANIMATOR_H
+#define __MZK_ANIMATOR_H
 
-#include "object.h"
-#include "property.h"
+#include "timer.h"
 
 namespace mzk
 {
-	class timer : public object
+	  template<typename value_type>
+	class animator
 	{
 	  public:
-		static void start_loop();
-		static void stop_loop();
-
-		static thread_local signal<> sig_loop_started;
-		static thread_local signal<> sig_loop_stopped;
-
-		static time_t get_current_time();
-
-		timer();
-		~timer();
+		animator();
 
 		property<bool> prop_running;
-		property<int> prop_ticks;
-		property<int> prop_delay;
-		property<int> prop_period;
-
-		signal<> sig_started;
-		signal<> sig_stopped;
-		signal<> sig_triggered;
-
-		bool mzk_notify();
+		property<value_type> prop_start_value;
+		property<value_type> prop_end_value;
+		property<value_type> prop_value;
+		property<int> prop_duration;
 
 	  private:
 		void _on_running_changed(bool);
+		void _set_progress(float);
+		void _on_tick();
 
-		int _ticks_left;
-		time_t _next_time;
+		timer _timer;
+		value_type _start;
+		value_type _end;
+		time_t _start_time;
+		time_t _end_time;
 	};
 }
+
+#ifndef __MZK_NO_IMPL
+# include "details/animator.inl"
+#endif
 
 #endif

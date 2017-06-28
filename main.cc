@@ -23,6 +23,7 @@
 #include <mzk/timer.h>
 #include <mzk/state-machine.h>
 #include <mzk/logger.h>
+#include <mzk/animator.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
 {
@@ -88,7 +89,7 @@ int main()
 
 	mzk::timer tim;
 	tim.prop_ticks = 5;
-	tim.prop_period = 100;
+	tim.prop_period = 200;
 	tim.prop_delay = 200;
 
 	tim.sig_triggered.connect([]() {
@@ -118,6 +119,15 @@ int main()
 	machine.prop_state = GAME;
 
 	machine.transit(GAME, ABOUT);
+
+
+	mzk::animator<float> anim;
+
+	anim.prop_running = true;
+
+
+
+
 	mzk::timer::start_loop();
 
 

@@ -81,10 +81,16 @@ namespace mzk
 			object_type *obj)
 	{
 		if (obj)
-			obj->register_mzk_pointer(this, strong);
+		{
+			reinterpret_cast<shared_object *>(obj)
+				->register_mzk_pointer(this, strong);
+		}
 
 		if (_pointer)
-			_pointer->unregister_mzk_pointer(this, strong);
+		{
+			reinterpret_cast<shared_object *>(_pointer)
+				->unregister_mzk_pointer(this, strong);
+		}
 
 		_pointer = obj;
 		return *this;
