@@ -65,15 +65,8 @@ namespace mzk
 	class signal : public slot_object
 	{
 	  public:
-		  template<typename method_type,
-			  	   typename slot_type,
-				   typename ...bind_arg_types>
-		ptr<connection> connect_slot(method_type method, 
-									 slot_type slot,
-									 const bind_arg_types &...bind_args);
-
-		  template<typename functor_type>
-		ptr<connection> connect_lambda(functor_type functor);
+		  template<typename ...bind_arg_types>
+		ptr<connection> connect(const bind_arg_types &...args);
 
 		void send(const arg_types &...args) const;
 

@@ -15,18 +15,72 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <mzk/timer.h>
+#include <unordered_set>
+#include <thread>
 
-#include "timer-thread.h"
+#include <mzk/timer.h>
 
 namespace mzk
 {
+	namespace
+	{
+		thread_local std::unordered_set<timer *> timer_set;
+		thread_local bool running_loop;
+		thread_local time_t next_time;
+
+		time_t get_current_time()
+		{
+			struct timespec ts;
+			clock_gettime(CLOCK_MONOTONIC, &ts);
+
+			return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+		}
+	}
+
+	void timer::start_loop()
+	{
+		running_loop = true;
+		next_time = get_current_time();
+
+		std::vector<timer *> tmp_set;
+
+		sig_loop_started();
+
+		while (running_loop)
+		{
+			if (next_time > get_current_time())
+			{
+				std::this_thread::yield();
+				continue;
+			}
+
+			next_time++;
+
+			tmp_set.resize(timer_set.size());
+			std::copy(timer_set.begin(), timer_set.end(), tmp_set.begin());
+
+			for (timer *tim : tmp_set)
+				if (timer_set.find(tim) != timer_set.end())
+					tim->mzk_notify();
+		}
+
+		sig_loop_stopped();
+	}
+
+	void timer::stop_loop()
+	{
+		running_loop = false;
+	}
+
+	thread_local signal<> timer::sig_loop_started;
+	thread_local signal<> timer::sig_loop_stopped;
+
 	timer::timer()
 	{
-		this_timer_set.insert(this);
+		timer_set.insert(this);
 
-		prop_running.connect_slot(&timer::_on_running_changed, 
-								  this, arg1);
+		prop_running.sig_changed.connect(
+				&timer::_on_running_changed, this, arg1);
 
 		prop_running = false;
 		prop_ticks = -1;
@@ -36,7 +90,7 @@ namespace mzk
 
 	timer::~timer()
 	{
-		this_timer_set.erase(this);
+		timer_set.erase(this);
 	}
 
 	bool timer::mzk_notify()

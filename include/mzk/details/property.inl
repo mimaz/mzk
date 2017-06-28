@@ -163,22 +163,6 @@ namespace mzk
 	  template<typename value_type>
 	inline void property<value_type>::clear_repeater()
 	{ _repeater = nullptr; }
-
-	  template<typename value_type>
-		template<typename method_type,
-		  		 typename slot_type,
-				 typename ...bind_arg_types>
-	inline ptr<connection> property<value_type>::connect_slot(
-			method_type method,
-			slot_type slot,
-			const bind_arg_types &...args)
-	{ return sig_changed.connect_slot(method, slot, args...); }
-	
-	  template<typename value_type>
-		template<typename functor_type>
-	inline ptr<connection> property<value_type>::connect_lambda(
-			functor_type functor)
-	{ return sig_changed.connect_lambda(functor); }
 	
 	extern template class property<bool>;
 	extern template class property<char>;

@@ -23,7 +23,6 @@
 #include <mzk/property.h>
 #include <mzk/timer.h>
 #include <mzk/state-machine.h>
-#include <mzk/timer-loop.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
 {
@@ -59,7 +58,7 @@ int main()
 	mzk::signal<int> sig;
 
 
-	auto scon = sig.connect_slot(&janusz::foo, sl.raw(), mzk::arg1, th.raw());
+	auto scon = sig.connect(&janusz::foo, sl.raw(), mzk::arg1, th.raw());
 
 
 	sig(925);
@@ -72,16 +71,16 @@ int main()
 	prop.set_repeater(mzk::make_repeater<int>([addition](int v) { return v + addition; }));
 	prop.set_repeater([addition](int v) { return addition + v * 10; });
 
-	auto pcon = prop.connect_lambda([](int n, int o) {
+	auto pcon = prop.sig_changed.connect([](int n, int o) {
 		std::cout << o << " -> " << n << std::endl;
-	});
+	}, mzk::arg1, mzk::arg2);
 
 
 	prop = 123;
 	prop = 543;
 
 
-	sig.connect_slot(&mzk::property<int>::set_value, &prop, mzk::arg1);
+	sig.connect(&mzk::property<int>::set_value, &prop, mzk::arg1);
 
 	sig(999);
 
@@ -92,18 +91,14 @@ int main()
 	tim.prop_period = 100;
 	tim.prop_delay = 200;
 
-	tim.sig_triggered.connect_lambda([]() {
+	tim.sig_triggered.connect([]() {
 		std::cout << "hello, world!" << std::endl;
 	});
 
+	tim.sig_stopped.connect(&mzk::timer::stop_loop);
+
 	tim.prop_running = true;
 
-	mzk::ptr<mzk::timer_loop> loop = new mzk::timer_loop;
-
-
-	tim.sig_stopped.connect_slot(&mzk::timer_loop::stop, loop);
-
-	loop->start();
 
 
 	enum stateid 
@@ -116,13 +111,14 @@ int main()
 
 	mzk::state_machine<stateid, LAST> machine;
 
-	machine.prop_state.connect_lambda([](int id, int old) {
+	machine.prop_state.sig_changed.connect([](int id, int old) {
 		std::cout << "id: " << id << std::endl;
-	});
+	}, mzk::arg1, mzk::arg2);
 
 	machine.prop_state = GAME;
 
 	machine.transit(GAME, ABOUT);
+	mzk::timer::start_loop();
 
 	return 0;
 }

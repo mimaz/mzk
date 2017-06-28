@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 
 set(lib_sources 
 	src/timer.cc 
-	src/timer-thread.cc 
-	src/timer-loop.cc 
 	src/signal.cc 
 	src/shared.cc 
 	src/property.cc

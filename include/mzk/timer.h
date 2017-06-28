@@ -26,6 +26,12 @@ namespace mzk
 	class timer : public object
 	{
 	  public:
+		static void start_loop();
+		static void stop_loop();
+
+		static thread_local signal<> sig_loop_started;
+		static thread_local signal<> sig_loop_stopped;
+
 		timer();
 		~timer();
 

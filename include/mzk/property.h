@@ -92,16 +92,6 @@ namespace mzk
 
 		void clear_repeater();
 
-		  template<typename method_type,
-				   typename slot_type,
-				   typename ...bind_arg_types>
-		ptr<connection> connect_slot(method_type method, 
-									 slot_type slot, 
-									 const bind_arg_types &...args);
-
-		  template<typename functor_type>
-		ptr<connection> connect_lambda(functor_type functor);
-
 		signal<value_type, value_type> sig_changed;
 
 	  private:

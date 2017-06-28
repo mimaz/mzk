@@ -26,6 +26,32 @@ namespace mzk
 {
 	namespace details
 	{
+		  template<typename functor_type, typename arg_type>
+		void iterate_slots(functor_type functor, arg_type *arg)
+		{
+			if (std::is_base_of<slot_object, arg_type>::value)
+				functor(reinterpret_cast<slot_object *>(arg));
+		}
+
+		  template<typename functor_type, typename arg_type>
+		void iterate_slots(functor_type functor, ptr<arg_type> arg)
+		{ iterate_slots(functor, arg.raw()); }
+
+		  template<typename functor_type, typename arg_type>
+		void iterate_slots(functor_type functor, arg_type arg)
+		{}
+
+		  template<typename functor_type>
+		void iterate_slots(functor_type functor)
+		{}
+
+		  template<typename functor_type, typename arg_type, typename ...rest_types>
+		void iterate_slots(functor_type functor, arg_type arg, rest_types ...rest)
+		{
+			iterate_slots(functor, arg);
+			iterate_slots(functor, rest...);
+		}
+
 		  template<typename ...arg_types>
 		struct bind_type_getter
 		{
@@ -43,14 +69,12 @@ namespace mzk
 	{
 	  public:
 		  template<typename ...owner_types>
-		inline specific_connection(
-				const std::initializer_list<slot_object *> &slot_list)
+		inline specific_connection(const owner_types &...owners)
 		{ 
-			for (slot_object *slot : slot_list)
-			{
-				slot->register_mzk_connection(this);
-				_owner_set.push_back(slot);
-			}
+			details::iterate_slots([this](slot_object *obj) {
+				obj->register_mzk_connection(this);
+				_owner_set.push_back(obj);
+			}, owners...);
 		}
 
 		inline ~specific_connection()
@@ -71,59 +95,26 @@ namespace mzk
 	};
 	
 	  template<typename ...arg_types>
-		template<typename method_type, 
-		  		 typename slot_type,
-				 typename ...bind_arg_types>
-	inline ptr<connection> signal<arg_types ...>::connect_slot(
-			method_type method,
-			slot_type slot,
-			const bind_arg_types &...bind_args)
+		template<typename ...bind_arg_types>
+	ptr<connection> signal<arg_types ...>::connect(
+			const bind_arg_types &...args)
 	{
 		class wrapper : public specific_connection<arg_types ...>
 		{
 		  public:
-			inline wrapper(signal *sig, 
-						   method_type method, 
-						   slot_type slot, 
-						   const bind_arg_types &...bind_args)
-				: specific_connection<arg_types ...>({ sig, slot })
-				, _binding(std::bind(method, slot, bind_args...))
+			wrapper(signal *sig, const bind_arg_types &...args)
+				: specific_connection<arg_types ...>(sig, args...)
+				, _binding(std::bind(args...))
 			{}
 
 			void invoke(const arg_types &...args) const override
 			{ _binding(args...); }
 
 		  private:
-			  const 
-			details::bind_type<method_type, 
-							   slot_type, 
-							   bind_arg_types ...> _binding;
+			const details::bind_type<bind_arg_types ...> _binding;
 		};
 
-		return new wrapper(this, method, slot, bind_args...);
-	}
-
-	  template<typename ...arg_types>
-		template<typename functor_type>
-	inline ptr<connection> signal<arg_types ...>::connect_lambda(
-			functor_type functor)
-	{
-		class wrapper : public specific_connection<arg_types ...>
-		{
-		  public:
-			inline wrapper(signal *sig, functor_type functor)
-				: specific_connection<arg_types ...>({ sig })
-				, _functor(functor)
-			{}
-
-			void invoke(const arg_types &...args) const override
-			{ _functor(args...); }
-
-		  private:
-			const functor_type _functor;
-		};
-
-		return new wrapper(this, functor);
+		return new wrapper(this, args...);
 	}
 
 	  template<typename ...arg_types>

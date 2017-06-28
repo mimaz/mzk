@@ -25,7 +25,7 @@ namespace mzk
 	  template<typename state_type, state_type state_count>
 	state_machine<state_type, state_count>::state_machine()
 	{
-		prop_state.connect_slot(
+		prop_state.sig_changed.connect(
 				&state_machine::_on_state_changed, 
 				this, arg1, arg2);
 	}
