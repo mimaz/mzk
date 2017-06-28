@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <thread>
+#include <initializer_list>
 
 #include <mzk/signal.h>
 #include <mzk/property.h>
@@ -49,6 +50,7 @@ class elephant : public mzk::shared_object, public mzk::slot_object
 {
 
 };
+
 
 int main()
 {
@@ -109,18 +111,19 @@ int main()
 		MENU,
 		GAME,
 		ABOUT,
+		LAST
 	};
 
-	mzk::state_machine<3, stateid> machine(MENU);
-	machine.prop_active_id.connect_lambda([](int id, int old) {
+	mzk::state_machine<stateid, LAST> machine;
+
+	machine.prop_state.connect_lambda([](int id, int old) {
 		std::cout << "id: " << id << std::endl;
 	});
 
-	machine.prop_active = true;
-	machine.prop_active_id = GAME;
+	machine.prop_state = GAME;
 
-	machine.transit<GAME, ABOUT>();
-
+	machine.transit(GAME, ABOUT);
 
 	return 0;
 }
+

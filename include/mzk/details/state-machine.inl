@@ -22,129 +22,31 @@
 
 namespace mzk
 {
-	/*
-	 * state_machine
-	 */
-
-	  template<int state_count, typename id_type>
-	inline state_machine<state_count, id_type>::state_machine(id_type initial)
-		: _initial_id(initial)
+	  template<typename state_type, state_type state_count>
+	state_machine<state_type, state_count>::state_machine()
 	{
-		prop_active.connect_slot(&state_machine::_on_active_changed, this, arg1);
-
-
-		auto binding = std::bind(&state_machine::_repeat_id, this, arg1);
-		auto repeater = make_repeater<id_type>(binding);
-
-		prop_active_id.set_repeater(repeater);
-
-
-		for (int i = 0; i < state_count; i++)
-			get_state(static_cast<id_type>(i))->assign(this, static_cast<id_type>(i));
-
-		prop_active = false;
-		prop_active_id = initial;
+		prop_state.connect_slot(
+				&state_machine::_on_state_changed, 
+				this, arg1, arg2);
 	}
 
-	  template<int state_count, typename id_type>
-		inline typename state_machine<state_count, id_type>::state *
-	state_machine<state_count, id_type>::get_state(id_type id)
-	{ return &_states[id]; }
-
-	  template<int state_count, typename id_type>
-	inline id_type state_machine<state_count, id_type>::get_initial_id() const
-	{ return _initial_id; }
-
-	  template<int state_count, typename id_type>
-		inline typename state_machine<state_count, id_type>::transition *
-	state_machine<state_count, id_type>::get_transition(id_type source, id_type target)
-	{ return get_state(source)->get_transition(target); }
-
-	  template<int state_count, typename id_type>
-		template<id_type source, id_type target>
-	inline void state_machine<state_count, id_type>::transit()
-	{ get_transition(source, target)->transit(); }
-
-	  template<int state_count, typename id_type>
-	inline id_type state_machine<state_count, id_type>::_repeat_id(id_type id) const
-	{ return prop_active ? id : static_cast<id_type>(prop_active_id); }
-
-	  template<int state_count, typename id_type>
-	inline void state_machine<state_count, id_type>::_on_active_changed(bool active)
+	  template<typename state_type, state_type state_count>
+	void state_machine<state_type, state_count>::transit(
+			state_type from, 
+			state_type to)
 	{
-		if (active)
-			prop_active_id = get_initial_id();
+		if (from == prop_state)
+			prop_state = to;
 	}
 
-	/*
-	 * state_machine::state
-	 */
-
-	  template<int state_count, typename id_type>
-	inline void state_machine<state_count, id_type>::state::assign(
-			state_machine *machine,
-			id_type id)
+	  template<typename state_type, state_type state_count>
+	void state_machine<state_type, state_count>::_on_state_changed(
+			state_type new_id,
+			state_type previous_id)
 	{
-		_machine = machine;
-		_id = id;
-
-		for (int i = 0; i < state_count; i++)
-			_transitions[i].assign(this, machine->get_state(static_cast<id_type>(i)));
+		sigv_state_exited[previous_id](previous_id);
+		sigv_state_entered[new_id](new_id);
 	}
-
-	  template<int state_count, typename id_type>
-		inline state_machine<state_count, id_type> *
-	state_machine<state_count, id_type>::state::get_machine() const
-	{ return _machine; }
-
-	  template<int state_count, typename id_type>
-		inline typename state_machine<state_count, id_type>::transition *
-	state_machine<state_count, id_type>::state::get_transition(id_type id)
-	{ return &_transitions[id]; }
-
-	  template<int state_count, typename id_type>
-	inline id_type state_machine<state_count, id_type>::state::get_id() const
-	{ return _id; }
-
-	/*
-	 * state_machine::transition
-	 */
-
-	  template<int state_count, typename id_type>
-	inline void state_machine<state_count, id_type>::transition::assign(
-			state *source,
-			state *target)
-	{
-		_source = source;
-		_target = target;
-	}
-
-	  template<int state_count, typename id_type>
-	inline void state_machine<state_count, id_type>::transition::transit()
-	{
-		id_type active_id = static_cast<id_type>(get_machine()->prop_active_id);
-
-		if (get_machine()->prop_active
-				&& get_source()->get_id() == active_id)
-		{
-			get_machine()->prop_active_id = get_target()->get_id();
-		}
-	}
-
-	  template<int state_count, typename id_type>
-		inline state_machine<state_count, id_type> *
-	state_machine<state_count, id_type>::transition::get_machine() const
-	{ return get_source()->get_machine(); }
-
-	  template<int state_count, typename id_type>
-		inline typename state_machine<state_count, id_type>::state *
-	state_machine<state_count, id_type>::transition::get_source() const
-	{ return _source; }
-
-	  template<int state_count, typename id_type>
-		inline typename state_machine<state_count, id_type>::state *
-	state_machine<state_count, id_type>::transition::get_target() const
-	{ return _target; }
 }
 
 #endif

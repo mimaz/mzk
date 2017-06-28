@@ -23,68 +23,21 @@
 
 namespace mzk
 {
-	  template<int state_count, typename id_type = int>
+	  template<typename state_type, state_type state_count>
 	class state_machine : public object
 	{
 	  public:
-		class state;
-		class transition;
+		state_machine();
 
-		state_machine(id_type initial);
+		void transit(state_type from, state_type to);
 
-		state *get_state(id_type id);
-		id_type get_initial_id() const;
-		transition *get_transition(id_type source, id_type target);
+		property<state_type> prop_state;
 
-		  template<id_type source, id_type target>
-		void transit();
-
-		property<bool> prop_active;
-		property<id_type> prop_active_id;
-	
-	  private:
-		id_type _repeat_id(id_type id) const;
-		void _on_active_changed(bool);
-		
-		state _states[state_count];
-		id_type _initial_id;
-		id_type _active_state_id;
-	};
-
-	  template<int state_count, typename id_type>
-	class state_machine<state_count, id_type>::state
-	{
-	  public:
-		void assign(state_machine *machine, id_type id);
-
-		state_machine *get_machine() const;
-		transition *get_transition(id_type id);
-		id_type get_id() const;
-
-		signal<> sig_entered;
-		signal<> sig_exited;
+		signal<state_type> sigv_state_entered[state_count];
+		signal<state_type> sigv_state_exited[state_count];
 
 	  private:
-		transition _transitions[state_count];
-		state_machine *_machine;
-		id_type _id;
-	};
-
-	  template<int state_count, typename id_type>
-	class state_machine<state_count, id_type>::transition
-	{
-	  public:
-		void assign(state *source, state *target);
-
-		void transit();
-
-		state_machine *get_machine() const;
-		state *get_source() const;
-		state *get_target() const;
-
-	  private:
-		state *_source;
-		state *_target;
+		void _on_state_changed(state_type, state_type);
 	};
 }
 
