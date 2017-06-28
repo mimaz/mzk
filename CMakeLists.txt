@@ -5,6 +5,7 @@ set(lib_sources
 	src/signal.cc 
 	src/shared.cc 
 	src/property.cc
+	src/logger.cc
 )
 
 include_directories(include/)

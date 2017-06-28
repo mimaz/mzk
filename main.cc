@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <thread>
 #include <initializer_list>
 
@@ -23,23 +22,24 @@
 #include <mzk/property.h>
 #include <mzk/timer.h>
 #include <mzk/state-machine.h>
+#include <mzk/logger.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
 {
   public:
 	janusz()
 	{
-		std::cout << "constructor" << std::endl;
+		mzk::logi("constructor");
 	}
 
 	~janusz()
 	{
-		std::cout << "destructor" << std::endl;
+		mzk::logi("destructor");
 	}
 
 	void foo(int i, mzk::shared_object *th)
 	{
-		std::cout << "janusz: " << i << std::endl;
+		mzk::logi("janusz");
 	}
 
   private:
@@ -72,7 +72,7 @@ int main()
 	prop.set_repeater([addition](int v) { return addition + v * 10; });
 
 	auto pcon = prop.sig_changed.connect([](int n, int o) {
-		std::cout << o << " -> " << n << std::endl;
+		mzk::logi(o, " -> ", n, mzk::endl);
 	}, mzk::arg1, mzk::arg2);
 
 
@@ -92,7 +92,7 @@ int main()
 	tim.prop_delay = 200;
 
 	tim.sig_triggered.connect([]() {
-		std::cout << "hello, world!" << std::endl;
+		mzk::loge("hello, world!");
 	});
 
 	tim.sig_stopped.connect(&mzk::timer::stop_loop);
@@ -112,13 +112,14 @@ int main()
 	mzk::state_machine<stateid, LAST> machine;
 
 	machine.prop_state.sig_changed.connect([](int id, int old) {
-		std::cout << "id: " << id << std::endl;
+		mzk::logi("id: ", id);
 	}, mzk::arg1, mzk::arg2);
 
 	machine.prop_state = GAME;
 
 	machine.transit(GAME, ABOUT);
 	mzk::timer::start_loop();
+
 
 	return 0;
 }
