@@ -88,9 +88,9 @@ int main()
 
 
 	mzk::timer tim;
-	tim.prop_ticks = 3;
-	tim.prop_period = 1000;
-	tim.prop_delay = 200;
+	tim.set_ticks(3);
+	tim.set_period(1000);
+	tim.set_delay(200);
 
 	tim.sig_triggered.connect([]() {
 		mzk::loge("hello, world!");
@@ -98,7 +98,7 @@ int main()
 
 	//tim.sig_stopped.connect(&mzk::timer::stop_loop);
 
-	tim.prop_running = true;
+	tim.start();
 
 
 
@@ -124,13 +124,13 @@ int main()
 	mzk::animator<float> anim;
 	anim.sig_stopped.connect(&mzk::timer::stop_loop);
 
-	anim.prop_duration = 5000;
-	anim.prop_start_value = 100;
-	anim.prop_end_value = 150;
+	anim.set_duration(5000);
+	anim.set_start_value(100);
+	anim.set_end_value(150);
 
-	anim.prop_running = true;
+	anim.start();
 
-	anim.prop_value.sig_changed.connect([](float v) { mzk::logi("v: ", v); }, mzk::arg1);
+	anim.sig_value_changed.connect([](float v) { mzk::logi("v: ", v); }, mzk::arg1);
 
 
 

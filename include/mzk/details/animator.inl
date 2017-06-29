@@ -24,65 +24,131 @@ namespace mzk
 {
 	  template<typename value_type>
 	animator<value_type>::animator()
+		: _running(false)
+		, _duration(1000)
 	{
-		prop_running.sig_changed.connect(
-				&animator::_on_running_changed,
-				this, arg1);
-
-		prop_running = false;
-		prop_duration = 1000;
-
 		_timer.sig_triggered.connect(&animator::_on_tick, this);
-		_timer.prop_ticks = -1;
-		_timer.prop_period = 1000 / 60;
-		_timer.prop_delay = 1000 / 60;
+		_timer.set_ticks(-1);
+		_timer.set_delay(1000 / 60);
+		_timer.set_period(1000 / 60);
 	}
 
 	  template<typename value_type>
-	void animator<value_type>::_on_running_changed(bool running)
+	bool animator<value_type>::is_running() const
+	{ return _running; }
+
+	  template<typename value_type>
+	int animator<value_type>::get_duration() const
+	{ return _duration; }
+
+	  template<typename value_type>
+	value_type animator<value_type>::get_start_value() const
+	{ return _start_value; }
+
+	  template<typename value_type>
+	value_type animator<value_type>::get_end_value() const
+	{ return _end_value; }
+
+	  template<typename value_type>
+	value_type animator<value_type>::get_value() const
+	{ return _value; }
+
+	  template<typename value_type>
+	void animator<value_type>::start()
+	{ set_running(true); }
+
+	  template<typename value_type>
+	void animator<value_type>::stop()
+	{ set_running(false); }
+
+	  template<typename value_type>
+	void animator<value_type>::restart()
 	{
-		if (running)
-		{
-			_start = prop_start_value;
-			_end = prop_end_value;
-			_start_time = timer::get_current_time();
-			_end_time = _start_time + prop_duration;
-
-			sig_started();
-		}
-		else
-		{
-			_set_progress(1.0f);
-
-			sig_stopped();
-		}
-
-		_timer.prop_running = running;
+		stop();
+		start();
 	}
 
 	  template<typename value_type>
-	void animator<value_type>::_on_tick()
+	void animator<value_type>::set_running(bool running)
 	{
-		time_t time = timer::get_current_time();
-
-		if (time >= _end_time)
+		if (running != _running)
 		{
-			prop_running = false;
-			return;
+			_running = running;
+
+			sig_running_changed(running);
+
+			if (running)
+			{
+				sig_started();
+				_start_time = timer::get_current_time();
+			}
+			else
+			{
+				sig_stopped();
+			}
+
+			_timer.set_running(running);
 		}
+	}
 
-		time_t elapsed = time - _start_time;
+	  template<typename value_type>
+	void animator<value_type>::set_duration(int duration)
+	{
+		if (duration != _duration)
+		{
+			_duration = duration;
+			sig_duration_changed(duration);
+		}
+	}
 
-		float progress = static_cast<float>(elapsed) 
-			/ (_end_time - _start_time);
+	  template<typename value_type>
+	void animator<value_type>::set_start_value(value_type value)
+	{
+		if (value != _start_value)
+		{
+			_start_value = value;
+			sig_start_value_changed(value);
+		}
+	}
 
-		_set_progress(progress);
+	  template<typename value_type>
+	void animator<value_type>::set_end_value(value_type value)
+	{
+		if (value != _end_value)
+		{
+			_end_value = value;
+			sig_end_value_changed(value);
+		}
 	}
 
 	  template<typename value_type>
 	void animator<value_type>::_set_progress(float progress)
 	{
-		prop_value = _start + (_end - _start) * progress;
+		_value = get_start_value() 
+			+ (get_end_value() - get_start_value()) 
+			* progress;
+		
+		sig_value_changed(get_value());
+	}
+
+	  template<typename value_type>
+	void animator<value_type>::_on_tick()
+	{
+		int time = timer::get_current_time();
+
+		int elapsed = time - _start_time;
+
+		float progress = static_cast<float>(elapsed) / get_duration();
+
+		if (progress < 1.0f)
+		{
+			_set_progress(progress);
+		}
+		else
+		{
+			_set_progress(1.0f);
+			stop();
+		}
 	}
 }
 

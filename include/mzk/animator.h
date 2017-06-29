@@ -28,27 +28,45 @@ namespace mzk
 	  public:
 		animator();
 
-		property<bool> prop_running;
-		property<value_type> prop_start_value;
-		property<value_type> prop_end_value;
-		property<value_type> prop_value;
-		property<int> prop_duration;
+		bool is_running() const;
+		int get_duration() const;
+		value_type get_start_value() const;
+		value_type get_end_value() const;
+		value_type get_value() const;
+
+		void start();
+		void stop();
+		void restart();
+
+		void set_running(bool);
+		void set_duration(int);
+		void set_start_value(value_type);
+		void set_end_value(value_type);
 
 		signal<> sig_started;
 		signal<> sig_stopped;
+		signal<bool> sig_running_changed;
+		signal<int> sig_duration_changed;
+		signal<value_type> sig_start_value_changed;
+		signal<value_type> sig_end_value_changed;
+		signal<value_type> sig_value_changed;
 
 	  private:
-		void _on_running_changed(bool);
 		void _set_progress(float);
 		void _on_tick();
 
+		bool _running;
+		int _duration;
+		value_type _start_value;
+		value_type _end_value;
+		value_type _value;
+
 		timer _timer;
-		value_type _start;
-		value_type _end;
-		time_t _start_time;
-		time_t _end_time;
+		int _start_time;
 	};
 	
+	extern template class animator<short>;
+	extern template class animator<unsigned short>;
 	extern template class animator<int>;
 	extern template class animator<unsigned int>;
 	extern template class animator<long>;

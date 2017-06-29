@@ -19,6 +19,8 @@
 
 namespace mzk
 {
+	template class animator<short>;
+	template class animator<unsigned short>;
 	template class animator<int>;
 	template class animator<unsigned int>;
 	template class animator<long>;

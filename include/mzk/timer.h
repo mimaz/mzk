@@ -19,7 +19,6 @@
 #define __MZK_TIMER_H
 
 #include "object.h"
-#include "property.h"
 
 namespace mzk
 {
@@ -32,27 +31,43 @@ namespace mzk
 		static thread_local signal<> sig_loop_started;
 		static thread_local signal<> sig_loop_stopped;
 
-		static time_t get_current_time();
+		static int get_current_time();
 
 		timer();
 		~timer();
 
-		property<bool> prop_running;
-		property<int> prop_ticks;
-		property<int> prop_delay;
-		property<int> prop_period;
+		void start();
+		void stop();
+		void restart();
+
+		void set_running(bool);
+		void set_ticks(int);
+		void set_delay(int);
+		void set_period(int);
+
+		bool is_running() const;
+		int get_ticks() const;
+		int get_delay() const;
+		int get_period() const;
 
 		signal<> sig_started;
 		signal<> sig_stopped;
+		signal<bool> sig_running_changed;
+		signal<int> sig_ticks_changed;
+		signal<int> sig_delay_changed;
+		signal<int> sig_period_changed;
 		signal<> sig_triggered;
 
-		bool mzk_notify();
+		void timer_tick();
 
 	  private:
-		void _on_running_changed(bool);
+		bool _running;
+		int _ticks;
+		int _delay;
+		int _period;
 
 		int _ticks_left;
-		time_t _next_time;
+		int _next_time;
 	};
 }
 

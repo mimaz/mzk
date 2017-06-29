@@ -27,14 +27,20 @@ namespace mzk
 		thread_local std::unordered_set<timer *> timer_set;
 		thread_local bool running_loop;
 		thread_local time_t next_time;
+		thread_local time_t start_time;
 	}
 
-	time_t timer::get_current_time()
+	int timer::get_current_time()
 	{
 		struct timespec ts;
 		clock_gettime(CLOCK_MONOTONIC, &ts);
 
-		return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+		time_t time = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+		if (start_time == 0)
+			start_time = time;
+
+		return static_cast<int>(time - start_time);
 	}
 
 	void timer::start_loop()
@@ -61,7 +67,7 @@ namespace mzk
 
 			for (timer *tim : tmp_set)
 				if (timer_set.find(tim) != timer_set.end())
-					tim->mzk_notify();
+					tim->timer_tick();
 		}
 
 		sig_loop_stopped();
@@ -76,16 +82,12 @@ namespace mzk
 	thread_local signal<> timer::sig_loop_stopped;
 
 	timer::timer()
+		: _running(false)
+		, _ticks(-1)
+		, _delay(0)
+		, _period(1000)
 	{
 		timer_set.insert(this);
-
-		prop_running.sig_changed.connect(
-				&timer::_on_running_changed, this, arg1);
-
-		prop_running = false;
-		prop_ticks = -1;
-		prop_delay = 0;
-		prop_period = 1000;
 	}
 
 	timer::~timer()
@@ -93,9 +95,81 @@ namespace mzk
 		timer_set.erase(this);
 	}
 
-	bool timer::mzk_notify()
+	void timer::start()
+	{ set_running(true); }
+
+	void timer::stop()
+	{ set_running(false); }
+
+	void timer::restart()
 	{
-		if (prop_running &&
+		stop();
+		start();
+	}
+
+	void timer::set_running(bool running)
+	{
+		if (running != _running)
+		{
+			_running = running;
+			sig_running_changed(running);
+
+			if (running)
+			{
+				sig_started();
+
+				_ticks_left = get_ticks();
+				_next_time = get_current_time() + get_delay();
+			}
+			else
+			{
+				sig_stopped();
+			}
+		}
+	}
+
+	void timer::set_ticks(int ticks)
+	{
+		if (ticks != _ticks)
+		{
+			_ticks = ticks;
+			sig_ticks_changed(ticks);
+		}
+	}
+
+	void timer::set_delay(int delay)
+	{
+		if (delay != _delay)
+		{
+			_delay = delay;
+			sig_delay_changed(delay);
+		}
+	}
+
+	void timer::set_period(int period)
+	{
+		if (period != _period)
+		{
+			_period = period;
+			sig_period_changed(period);
+		}
+	}
+
+	bool timer::is_running() const
+	{ return _running; }
+
+	int timer::get_ticks() const
+	{ return _ticks; }
+
+	int timer::get_delay() const
+	{ return _delay; }
+
+	int timer::get_period() const
+	{ return _period; }
+
+	void timer::timer_tick()
+	{
+		if (is_running() &&
 				_next_time <= get_current_time())
 		{
 			sig_triggered();
@@ -104,28 +178,9 @@ namespace mzk
 				_ticks_left--;
 
 			if (_ticks_left)
-				_next_time += prop_period;
+				_next_time += get_period();
 			else
-				prop_running = false;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	void timer::_on_running_changed(bool running)
-	{
-		if (running)
-		{
-			_ticks_left = prop_ticks;
-			_next_time = get_current_time() + prop_delay;
-
-			sig_started();
-		}
-		else
-		{
-			sig_stopped();
+				stop();
 		}
 	}
 }
