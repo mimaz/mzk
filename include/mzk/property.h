@@ -31,11 +31,7 @@
 namespace mzk
 {
 	  template<typename value_type>
-	class repeater_interface : public shared_object
-	{
-	  public:
-		virtual value_type pass(const value_type &value) = 0;
-	};
+	class repeater_interface;
 	
 	  template<typename value_type>
 	using repeater = ptr<repeater_interface<value_type>>;

@@ -6,6 +6,7 @@ set(lib_sources
 	src/shared.cc 
 	src/property.cc
 	src/logger.cc
+	src/animator.cc
 )
 
 include_directories(include/)

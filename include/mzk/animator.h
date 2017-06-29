@@ -34,6 +34,9 @@ namespace mzk
 		property<value_type> prop_value;
 		property<int> prop_duration;
 
+		signal<> sig_started;
+		signal<> sig_stopped;
+
 	  private:
 		void _on_running_changed(bool);
 		void _set_progress(float);
@@ -45,6 +48,14 @@ namespace mzk
 		time_t _start_time;
 		time_t _end_time;
 	};
+	
+	extern template class animator<int>;
+	extern template class animator<unsigned int>;
+	extern template class animator<long>;
+	extern template class animator<unsigned long>;
+	extern template class animator<float>;
+	extern template class animator<double>;
+	extern template class animator<long double>;
 }
 
 #ifndef __MZK_NO_IMPL

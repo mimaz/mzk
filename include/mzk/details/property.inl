@@ -27,6 +27,13 @@
 
 namespace mzk
 {
+	  template<typename value_type>
+	class repeater_interface : public shared_object
+	{
+	  public:
+		virtual value_type pass(const value_type &value) = 0;
+	};
+
 	  template<typename value_type, typename functor_type>
 	inline repeater<value_type> make_repeater(functor_type functor)
 	{

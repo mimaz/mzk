@@ -29,20 +29,13 @@ namespace mzk
 				&animator::_on_running_changed,
 				this, arg1);
 
-		prop_duration.sig_changed.connect(
-				&property<int>::set_value,
-				&_timer.prop_period,
-				arg1);
-
-		prop_duration.sig_changed.connect(
-				&property<int>::set_value,
-				&_timer.prop_delay,
-				arg1);
-
 		prop_running = false;
 		prop_duration = 1000;
 
 		_timer.sig_triggered.connect(&animator::_on_tick, this);
+		_timer.prop_ticks = -1;
+		_timer.prop_period = 1000 / 60;
+		_timer.prop_delay = 1000 / 60;
 	}
 
 	  template<typename value_type>
@@ -54,10 +47,14 @@ namespace mzk
 			_end = prop_end_value;
 			_start_time = timer::get_current_time();
 			_end_time = _start_time + prop_duration;
+
+			sig_started();
 		}
 		else
 		{
 			_set_progress(1.0f);
+
+			sig_stopped();
 		}
 
 		_timer.prop_running = running;
@@ -85,7 +82,7 @@ namespace mzk
 	  template<typename value_type>
 	void animator<value_type>::_set_progress(float progress)
 	{
-		mzk::logi("progress: ", progress);
+		prop_value = _start + (_end - _start) * progress;
 	}
 }
 
