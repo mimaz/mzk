@@ -52,7 +52,7 @@ namespace mzk
 		void unregister_mzk_connection(connection *conn);
 	 
 	  private:
-		std::unordered_set<ptr<connection>> _connection_set;
+		std::unordered_set<ref<connection>> _connection_set;
 
 		  template<typename ...>
 		friend class signal;
@@ -66,7 +66,7 @@ namespace mzk
 	{
 	  public:
 		  template<typename ...bind_arg_types>
-		ptr<connection> connect(const bind_arg_types &...args);
+		ref<connection> connect(const bind_arg_types &...args);
 
 		void send(const arg_types &...args) const;
 

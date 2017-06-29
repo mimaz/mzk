@@ -22,133 +22,124 @@
 
 namespace mzk
 {
-	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::pointer()
-		: _pointer(nullptr)
-	{}
+	  template<typename object_type>
+	object_type *base_ref::get_pointer() const
+	{ return static_cast<object_type *>(_pointer); }
+
+	  template<typename object_type>
+	void base_ref::set_pointer(object_type *pointer)
+	{ _pointer = pointer; }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::pointer(
-			const pointer &other)
-		: pointer()
+	ref<object_type, strong>::ref(
+			const ref &other)
 	{ operator=(other); }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::pointer(
-			pointer &&other)
-		: pointer()
+	ref<object_type, strong>::ref(
+			ref &&other)
 	{ operator=(other); }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::pointer(
+	ref<object_type, strong>::ref(
 			object_type *obj)
-		: pointer()
 	{ operator=(obj); }
 
 	  template<typename object_type, bool strong>
 		template<typename other_object_type, bool other_strong>
-	inline pointer<object_type, strong>::pointer(
-			const pointer<other_object_type, other_strong> &other)
-		: pointer()
+	ref<object_type, strong>::ref(
+			const ref<other_object_type, other_strong> &other)
 	{ operator=(other); }
 
 	  template<typename object_type, bool strong>
 		template<typename other_object_type>
-	inline pointer<object_type, strong>::pointer(
+	ref<object_type, strong>::ref(
 			other_object_type *obj)
-		: pointer()
 	{ operator=(obj); }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::~pointer()
+	ref<object_type, strong>::~ref()
 	{ operator=(nullptr); }
 
 	  template<typename object_type, bool strong>
-		inline pointer<object_type, strong> &
-	pointer<object_type, strong>::operator=(
-			const pointer &other)
+	ref<object_type, strong> &ref<object_type, strong>::operator=(
+			const ref &other)
 	{ return operator=(static_cast<object_type *>(other)); }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong> &
-	pointer<object_type, strong>::operator=(
-			pointer &&other)
+	ref<object_type, strong> &ref<object_type, strong>::operator=(
+			ref &&other)
 	{ return operator=(static_cast<object_type *>(other)); }
 
 	  template<typename object_type, bool strong>
-		inline pointer<object_type, strong> &
-	pointer<object_type, strong>::operator=(
+	ref<object_type, strong> &ref<object_type, strong>::operator=(
 			object_type *obj)
 	{
-		if (obj)
+		if (reinterpret_cast<shared_object *>(obj) != get_pointer())
 		{
-			reinterpret_cast<shared_object *>(obj)
-				->register_mzk_pointer(this, strong);
+			if (get_pointer())
+				get_pointer()->unregister_mzk_ref(this, strong);
+
+			set_pointer(reinterpret_cast<shared_object *>(obj));
+
+			if (get_pointer())
+				get_pointer()->register_mzk_ref(this, strong);
 		}
 
-		if (_pointer)
-		{
-			reinterpret_cast<shared_object *>(_pointer)
-				->unregister_mzk_pointer(this, strong);
-		}
-
-		_pointer = obj;
 		return *this;
 	}
 
 	  template<typename object_type, bool strong>
 		template<typename other_object_type, bool other_strong>
-		  inline pointer<object_type, strong> &
-	pointer<object_type, strong>::operator=(
-			const pointer<other_object_type, other_strong> &other)
+	ref<object_type, strong> &ref<object_type, strong>::operator=(
+			const ref<other_object_type, other_strong> &other)
 	{ return operator=(static_cast<object_type *>(other)); }
 
 	  template<typename object_type, bool strong>
 		template<typename other_object_type>
-		  inline pointer<object_type, strong> &
-	pointer<object_type, strong>::operator=(
+	ref<object_type, strong> &ref<object_type, strong>::operator=(
 			other_object_type *obj)
 	{ return operator=(static_cast<object_type *>(obj)); }
 
 	  template<typename object_type, bool strong>
-	bool pointer<object_type, strong>::operator==(const pointer &ptr) const
+	bool ref<object_type, strong>::operator==(const ref &ptr) const
 	{ return operator==(ptr.raw()); }
 
 	  template<typename object_type, bool strong>
-	bool pointer<object_type, strong>::operator==(const object_type *obj) const
+	bool ref<object_type, strong>::operator==(const object_type *obj) const
 	{ return raw() == obj; }
 
 	  template<typename object_type, bool strong>
-	inline object_type *pointer<object_type, strong>::raw() const
-	{ return _pointer; }
+	object_type *ref<object_type, strong>::raw() const
+	{ return get_pointer<object_type>(); }
 
 	  template<typename object_type, bool strong>
-	inline pointer<object_type, strong>::operator object_type *() const
+	ref<object_type, strong>::operator object_type *() const
 	{ return raw(); }
 
 	  template<typename object_type, bool strong>
-	inline object_type *pointer<object_type, strong>::operator->() const
+	object_type *ref<object_type, strong>::operator->() const
 	{ return raw(); }
 
 	  template<typename object_type, bool strong>
-	inline void pointer<object_type, strong>::on_mzk_object_delete()
-	{ _pointer = nullptr; }
+	void ref<object_type, strong>::on_mzk_object_delete()
+	{ set_pointer(static_cast<shared_object *>(nullptr)); }
 
 	  template<typename object_type, bool strong>
 		template<typename other_object_type>
-	inline other_object_type *pointer<object_type, strong>::cast() const
+	other_object_type *ref<object_type, strong>::cast() const
 	{ return static_cast<other_object_type *>(raw()); }
 
 	  template<typename object_type, bool strong>
-	inline bool pointer<object_type, strong>::is_null() const
+	bool ref<object_type, strong>::is_null() const
 	{ return raw() == nullptr; }
 }
 
 namespace std
 {
 	  template<typename object_type, bool strong>
-	inline size_t hash<mzk::pointer<object_type, strong>>::operator()(
-			const mzk::pointer<object_type, strong> &ptr) const
+	size_t hash<mzk::ref<object_type, strong>>::operator()(
+			const mzk::ref<object_type, strong> &ptr) const
 	{ return hash<object_type *>()(ptr.raw()); }
 }
 

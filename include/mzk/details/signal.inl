@@ -34,7 +34,7 @@ namespace mzk
 		}
 
 		  template<typename functor_type, typename arg_type>
-		void iterate_slots(functor_type functor, ptr<arg_type> arg)
+		void iterate_slots(functor_type functor, ref<arg_type> arg)
 		{ iterate_slots(functor, arg.raw()); }
 
 		  template<typename functor_type, typename arg_type>
@@ -69,7 +69,7 @@ namespace mzk
 	{
 	  public:
 		  template<typename ...owner_types>
-		inline specific_connection(const owner_types &...owners)
+		specific_connection(const owner_types &...owners)
 		{ 
 			details::iterate_slots([this](slot_object *obj) {
 				obj->register_mzk_connection(this);
@@ -77,10 +77,10 @@ namespace mzk
 			}, owners...);
 		}
 
-		inline ~specific_connection()
+		~specific_connection()
 		{ disconnect(); }
 		 
-		inline void disconnect() override
+		void disconnect() override
 		{ 
 			for (slot_object *owner : _owner_set)
 				owner->unregister_mzk_connection(this);
@@ -96,7 +96,7 @@ namespace mzk
 	
 	  template<typename ...arg_types>
 		template<typename ...bind_arg_types>
-	ptr<connection> signal<arg_types ...>::connect(
+	ref<connection> signal<arg_types ...>::connect(
 			const bind_arg_types &...args)
 	{
 		class wrapper : public specific_connection<arg_types ...>
@@ -118,15 +118,15 @@ namespace mzk
 	}
 
 	  template<typename ...arg_types>
-	inline void signal<arg_types ...>::send(
+	void signal<arg_types ...>::send(
 			const arg_types &...args) const
 	{
-		for (const ptr<connection> &conn : _connection_set)
+		for (const ref<connection> &conn : _connection_set)
 			conn.cast<specific_connection<arg_types ...>>()->invoke(args...);
 	}
 
 	  template<typename ...arg_types>
-	inline void signal<arg_types ...>::operator()(
+	void signal<arg_types ...>::operator()(
 			const arg_types &...args) const
 	{ send(args...); }
 

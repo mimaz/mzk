@@ -54,8 +54,8 @@ class elephant : public mzk::shared_object, public mzk::slot_object
 
 int main()
 {
-	mzk::ptr<janusz> sl = new janusz;
-	mzk::ptr<elephant> th = new elephant;
+	mzk::ref<janusz> sl = new janusz;
+	mzk::ref<elephant> th = new elephant;
 	mzk::signal<int> sig;
 
 

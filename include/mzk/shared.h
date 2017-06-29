@@ -22,89 +22,96 @@
 
 namespace mzk
 {
+	class base_ref;
+
 	class shared_object
 	{
 	  public:
-		class pointer
-		{
-		  public:
-			virtual void on_mzk_object_delete() = 0;
-		};
-
 		shared_object() = default;
 		shared_object(const shared_object &other) = delete;
 		shared_object(shared_object &&other) = delete;
 
 		virtual ~shared_object();
 
-		void register_mzk_pointer(pointer *ptr, bool strong);
-		void unregister_mzk_pointer(pointer *ptr, bool strong);
+		void register_mzk_ref(base_ref *ptr, bool strong);
+		void unregister_mzk_ref(base_ref *ptr, bool strong);
 
 	  private:
-		std::unordered_set<pointer *> _ptr_set;
+		std::unordered_set<base_ref *> _ptr_set;
 		int _ref_count;
 	};
 
-	  template<typename object_type, bool strong>
-	class pointer : public shared_object::pointer
+	class base_ref
 	{
 	  public:
-		pointer();
-		pointer(const pointer &other);
-		pointer(pointer &&other);
+		base_ref();
 
-		pointer(object_type *obj);
+		virtual void on_mzk_object_delete() = 0;
+
+		  template<typename object_type = shared_object>
+		object_type *get_pointer() const;
+
+		  template<typename object_type>
+		void set_pointer(object_type *pointer);
+
+	  private:
+		shared_object *_pointer;
+	};
+
+	  template<typename object_type, bool strong = true>
+	class ref : public base_ref
+	{
+	  public:
+		ref() {}
+		ref(const ref &other);
+		ref(ref &&other);
+
+		ref(object_type *obj);
 
 		  template<typename other_object_type, bool other_strong>
-		pointer(const pointer<other_object_type, other_strong> &other);
+		ref(const ref<other_object_type, other_strong> &other);
 
 		  template<typename other_object_type>
-		pointer(other_object_type *obj);
+		ref(other_object_type *obj);
 
-		~pointer();
+		~ref();
 
-		pointer &operator=(const pointer &other);
-		pointer &operator=(pointer &&other);
-		pointer &operator=(object_type *obj);
+		ref &operator=(const ref &other);
+		ref &operator=(ref &&other);
+		ref &operator=(object_type *obj);
 
 		  template<typename other_object_type, bool other_strong>
-		pointer &operator=(const pointer<other_object_type, other_strong> &other);
+		ref &operator=(const ref<other_object_type, other_strong> &other);
 
 		  template<typename other_object_type>
-		pointer &operator=(other_object_type *obj);
+		ref &operator=(other_object_type *obj);
 
-		bool operator==(const pointer &ptr) const;
+		bool operator==(const ref &ptr) const;
 		bool operator==(const object_type *obj) const;
 
 		object_type *raw() const;
 		operator object_type *() const;
 		object_type *operator->() const;
 
+		void on_mzk_object_delete() override;
+
 		  template<typename other_object_type>
 		inline other_object_type *cast() const;
 
 		bool is_null() const;
-
-		void on_mzk_object_delete() override;
-
-	 private:
-		object_type *_pointer;
 	};
 
 	  template<typename object_type>
-	using ptr = pointer<object_type, true>;
-
-	  template<typename object_type>
-	using weak_ptr = pointer<object_type, false>;
+	using weak_ref = ref<object_type, false>;
 }
 
 namespace std
 {
 	  template<typename object_type, bool strong>
-	class hash<mzk::pointer<object_type, strong>>
+	class hash<mzk::ref<object_type, strong>>
 	{
 	  public:
-		size_t operator()(const mzk::pointer<object_type, strong> &ptr) const;
+		size_t operator()(const mzk::ref<object_type, strong> &ptr) const;
 	};
 };
 

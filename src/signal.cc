@@ -21,7 +21,7 @@ namespace mzk
 {
 	slot_object::~slot_object()
 	{
-		std::vector<ptr<connection>> tmpset(
+		std::vector<ref<connection>> tmpset(
 				_connection_set.begin(), 
 				_connection_set.end());
 

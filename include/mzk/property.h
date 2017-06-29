@@ -34,7 +34,7 @@ namespace mzk
 	class repeater_interface;
 	
 	  template<typename value_type>
-	using repeater = ptr<repeater_interface<value_type>>;
+	using repeater = ref<repeater_interface<value_type>>;
 	
 	  template<typename value_type, typename functor_type>
 	repeater<value_type> make_repeater(functor_type functor);

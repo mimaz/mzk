@@ -21,12 +21,12 @@ namespace mzk
 {
 	shared_object::~shared_object()
 	{
-		for (pointer *ptr : _ptr_set)
+		for (base_ref *ptr : _ptr_set)
 			ptr->on_mzk_object_delete();
 	}
 
-	void shared_object::register_mzk_pointer(
-			pointer *ptr,
+	void shared_object::register_mzk_ref(
+			base_ref *ptr,
 			bool strong)
 	{ 
 		if (_ptr_set.find(ptr) == _ptr_set.end())
@@ -38,8 +38,8 @@ namespace mzk
 		}
 	}
 
-	void shared_object::unregister_mzk_pointer(
-			pointer *ptr,
+	void shared_object::unregister_mzk_ref(
+			base_ref *ptr,
 			bool strong)
 	{ 
 		if (_ptr_set.find(ptr) != _ptr_set.end())
@@ -55,4 +55,8 @@ namespace mzk
 			}
 		}
 	}
+
+	base_ref::base_ref()
+		: _pointer(nullptr)
+	{}
 }
