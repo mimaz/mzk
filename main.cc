@@ -18,12 +18,7 @@
 #include <thread>
 #include <initializer_list>
 
-#include <mzk/signal.h>
-#include <mzk/property.h>
-#include <mzk/timer.h>
-#include <mzk/state-machine.h>
-#include <mzk/logger.h>
-#include <mzk/animator.h>
+#include <mzk/mzk.h>
 
 class janusz : public mzk::shared_object, public mzk::slot_object
 {
